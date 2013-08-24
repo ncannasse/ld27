@@ -24,9 +24,7 @@ class Game {
 	var fire : h2d.SpriteBatch;
 	var stones : h2d.SpriteBatch;
 	var world : h2d.Sprite;
-	var bg : h2d.Sprite;
-	var bg2 : h2d.Sprite;
-	var bg3 : h2d.Sprite;
+	var bg : Background;
 	var font : h2d.Font;
 	
 	var todo : Array < Float -> Bool >;
@@ -44,7 +42,6 @@ class Game {
 		
 		var french = hxd.System.lang == "fr";
 		wavesData = [
-		/*
 			M(Slime,0),
 			Tuto("Press "+(french?"A":"Q")+" to attack monsters", function() return fighters.length == 1),
 			M(Slime, 200, 3),
@@ -53,24 +50,28 @@ class Game {
 			M(Goblin, 300, 1),
 			M(Time, 200),
 			Wait(500),
-			Chest(Shield, "Use " + (french?"Z":"W") + " to protect yourself"),
+			Chest(Slide, "Use "+(french?"Z":"W")+" to slide"),
 			Wait(300),
-			M(Fireball, 200, 3),
-			M(Wizard, 50),
+			M(Crow, 40, 3),
+			Wait(200),
+			M(Crow, 40, 3),
+			Wait(200),
+			M(Crow, 40, 3),
 			M(Time, 200),
 			M(Stone, 300),
 			Wait(300),
 			M(Goblin, 150, 2),
-		*/
 			M(Time, 300),
 			Wait(500),
-			Chest(Slide, "Use E to slide"),
+			Chest(Shield, "Use E to protect yourself"),
 			Wait(300),
-			M(Crow, 40, 3),
-			Wait(200),
-			M(Crow, 40, 3),
-			Wait(200),
-			M(Crow, 40, 3),
+			M(Fireball, 200, 3),
+			M(Wizard, 50),
+			M(Time, 200),
+			M(Fireball, 150, 3),
+			M(Wizard, 50),
+			M(Fireball, 150, 3),
+			M(Wizard, 50),
 			M(Time, 200),
 			End,
 		];
@@ -86,38 +87,10 @@ class Game {
 	public function init() {
 		
 		world = new h2d.Sprite(scene);
-		
-		bg = new h2d.Sprite(world);
-		bg2 = new h2d.Sprite(bg);
-		bg3 = new h2d.Sprite(bg);
+		bg = new Background();
 		
 		todo = [];
 		allTexts = [];
-		
-		
-		
-		var sbg = hxd.Resource.embed("gfx/bg1.png").toTile();
-		for( i in 0...40 ) {
-			var b = new h2d.Bitmap(sbg, bg);
-			b.x = i * sbg.width;
-			b.colorKey = 0x5E016D;
-			b.y = scene.height - sbg.height;
-		}
-		
-		var sbg = hxd.Resource.embed("gfx/bg.png").toTile();
-		for( i in 0...40 ) {
-			var b = new h2d.Bitmap(sbg, bg3);
-			b.x = i * sbg.width;
-			b.colorKey = 0x5E016D;
-			b.y = scene.height - sbg.height - 49;
-		}
-		
-
-		var sbg = hxd.Resource.embed("gfx/bg2.png").toTile();
-		for( i in 0...40 ) {
-			var b = new h2d.Bitmap(sbg, bg2);
-			b.x = i * sbg.width;
-		}
 		
 		fightCont = new h2d.Sprite(world);
 		
@@ -219,17 +192,16 @@ class Game {
 		
 		if( Key.isToggled("A".code) || Key.isToggled("Q".code) )
 			hero.action(first);
-		if( (Key.isToggled("Z".code) || Key.isToggled("W".code)) && hero.has(Shield) )
-			hero.block();
-		if( Key.isToggled("E".code) )
+		if( (Key.isToggled("Z".code) || Key.isToggled("W".code)) && hero.has(Slide) )
 			hero.slide();
+		if( Key.isToggled("E".code) && hero.has(Shield) )
+			hero.block();
 		
 		
 		var tx = -Math.max(hero.x - scene.width * 0.2, 0);
 		var ws = Math.pow(0.5, dt);
 		world.x = Std.int(world.x * ws + (1 - ws) * tx);
-		bg3.x = -world.x * 0.15;
-		bg2.x = -world.x * 0.8;
+		bg.update( -world.x);
 		
 		switch( wavesData[wavePos] ) {
 		case Tuto(text, cond):
