@@ -73,8 +73,9 @@ class Hero extends Fighter {
 			
 		if( m == null || m.x > x + 25 || m.maxLife == 0 ) {
 			pause = 20;
-			slow = 20.;
-			moveSpeed = 2;
+			slow = 10.;
+			moveSpeed = 0;
+			play(hxd.Resource.embed("gfx/hero_lock.png"));
 			return;
 		}
 			

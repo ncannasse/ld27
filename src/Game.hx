@@ -1,6 +1,7 @@
 typedef K = hxd.Key;
 
 enum Wave {
+	Resume;
 	Tuto( t : String, ?cond : Void -> Bool );
 	M( m : Fighter.FKind, dist : Int, ?count : Int );
 	Wait( dist : Int );
@@ -42,6 +43,7 @@ class Game {
 		
 		var french = hxd.System.lang == "fr";
 		wavesData = [
+		
 			M(Slime,0),
 			Tuto("Press "+(french?"A":"Q")+" to attack monsters", function() return fighters.length == 1),
 			M(Slime, 200, 3),
@@ -49,6 +51,7 @@ class Game {
 			Tuto("Hit "+(french?"A":"Q")+" faster!", function() return fighters.length == 1),
 			M(Goblin, 300, 1),
 			M(Time, 200),
+			
 			Wait(500),
 			Chest(Slide, "Use "+(french?"Z":"W")+" to slide"),
 			Wait(300),
@@ -57,22 +60,28 @@ class Game {
 			M(Crow, 40, 3),
 			Wait(200),
 			M(Crow, 40, 3),
+			
 			M(Time, 200),
 			M(Stone, 300),
 			Wait(300),
 			M(Goblin, 150, 2),
 			M(Time, 300),
+			
 			Wait(500),
 			Chest(Shield, "Use E to protect yourself"),
 			Wait(300),
 			M(Fireball, 200, 3),
 			M(Wizard, 50),
 			M(Time, 200),
+			
+			Wait(50),
 			M(Fireball, 150, 3),
 			M(Wizard, 50),
+			Wait(50),
 			M(Fireball, 150, 3),
 			M(Wizard, 50),
 			M(Time, 200),
+			
 			End,
 		];
 		
@@ -98,6 +107,20 @@ class Game {
 		
 		hero = new Hero();
 
+
+		
+		for( i in 0...wavesData.length )
+			if( wavesData[i] == Resume ) {
+				for( j in 0...i )
+					switch( wavesData[j] ) {
+					case Chest(c,_):
+						hero.inventory.push(c);
+					default:
+					}
+				wavesData.splice(0, i);
+				break;
+			}
+		
 		var rexpl = hxd.Resource.embed("gfx/explode.png");
 		
 		expl = new h2d.SpriteBatch(rexpl.toTile().center(16,16), world);
@@ -196,7 +219,17 @@ class Game {
 			hero.slide();
 		if( Key.isToggled("E".code) && hero.has(Shield) )
 			hero.block();
-		
+			
+		if( Key.isToggled("R".code) ) {
+			haxe.Timer.delay(function() {
+				dispose();
+				inst = new Game(engine);
+				inst.init();
+			},0);
+			return;
+		}
+			
+			
 		
 		var tx = -Math.max(hero.x - scene.width * 0.2, 0);
 		var ws = Math.pow(0.5, dt);
@@ -204,6 +237,8 @@ class Game {
 		bg.update( -world.x);
 		
 		switch( wavesData[wavePos] ) {
+		case Resume:
+			wavePos++;
 		case Tuto(text, cond):
 			popText(text, 0xFFFFFF, cond);
 			wavePos++;
