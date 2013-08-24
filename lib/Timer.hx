@@ -1,7 +1,7 @@
 
 class Timer {
 
-	public static var wantedFPS = 32;
+	public static var wantedFPS = 60;
 	public static var maxDeltaTime = 0.5;
 	public static var oldTime = flash.Lib.getTimer();
 	public static var tmod_factor = 0.95;

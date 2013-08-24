@@ -1,7 +1,7 @@
 -cp src
 -cp lib
 -swf ld27.swf
--swf-header 800:600:60:FFFFFF
+-swf-header 750:600:60:FFFFFF
 --flash-strict
 -swf-version 11.7
 -main Game
