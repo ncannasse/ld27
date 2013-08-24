@@ -1,9 +1,10 @@
 typedef K = hxd.Key;
 
 enum Wave {
-	Tuto( t : String, cond : Void -> Bool );
+	Tuto( t : String, ?cond : Void -> Bool );
 	M( m : Fighter.FKind, dist : Int, ?count : Int );
 	Wait( dist : Int );
+	Chest( k : Fighter.CKind, text : String );
 	End;
 }
 
@@ -20,6 +21,7 @@ class Game {
 	var scene : h2d.Scene;
 	var hero : Hero;
 	var expl : h2d.SpriteBatch;
+	var stones : h2d.SpriteBatch;
 	var world : h2d.Sprite;
 	var bg : h2d.Sprite;
 	var font : h2d.Font;
@@ -32,7 +34,32 @@ class Game {
 	var nextTime : Float;
 	var remTime : flash.text.TextField;
 	
+	var isGameOver : Bool;
+	
 	public function new(e) {
+		
+		var french = hxd.System.lang == "fr";
+		wavesData = [
+			M(Slime,0),
+			Tuto("Press "+(french?"A":"Q")+" to attack monsters", function() return fighters.length == 1),
+			M(Slime, 200, 3),
+			M(Goblin, 300),
+			Tuto("Hit "+(french?"A":"Q")+" faster!", function() return fighters.length == 1),
+			M(Goblin, 300, 1),
+			M(Time, 200),
+			Wait(500),
+			Chest(Shield, "Use " + (french?"Z":"W") + " to protect yourself"),
+			Wait(300),
+			M(Fireball, 200, 3),
+			M(Wizard, 50),
+			M(Time, 200),
+			M(Stone, 300),
+			Wait(300),
+			M(Goblin, 150, 2),
+			M(Time,300),
+			End,
+		];
+		
 		this.engine = e;
 		h2d.Font.embed("Verdana", "gfx/Verdana.ttf");
 		font = new h2d.Font("Verdana", 32);
@@ -42,18 +69,6 @@ class Game {
 	}
 		
 	public function init() {
-		
-		
-		wavesData = [
-			M(Slime,0),
-			Tuto("Press Q to attack monsters", function() return fighters.length == 1),
-			M(Slime, 200, 3),
-			M(Goblin, 300),
-			Tuto("Hit Q faster!", function() return fighters.length == 1),
-			M(Goblin, 300, 2),
-			M(Time, 200),
-			End,
-		];
 		
 		world = new h2d.Sprite(scene);
 		
@@ -81,9 +96,14 @@ class Game {
 		expl.blendMode = Add;
 		expl.color = new h3d.Vector(1, 0.6, 0., 1);
 		
+
+		stones = new h2d.SpriteBatch(hxd.Resource.embed("gfx/smallStone.png").toTile().center(8, 8), world);
+		stones.colorKey = 0x5E016D;
+		stones.hasRotationScale = true;
+		stones.hasUpdate = true;
 		
 		remTime = newText();
-		remTime.x = 350;
+		remTime.x = 120;
 		remTime.y = 550;
 		
 		nextTime = haxe.Timer.stamp() + 10;
@@ -124,16 +144,34 @@ class Game {
 				popText("Time UP!", 0xE1E6FF);
 				nextTime = haxe.Timer.stamp() + 10;
 				first.kill();
+			case FChest(kind,text):
+				popText(text, 0xE1E6FF);
+				first.kill();
+			case Fireball:
+				if( first.x <= hero.x + 10 ) {
+					if( !hero.blocking )
+						hero.push -= 200;
+					else
+						hero.slow *= 0.5;
+					first.remove();
+				}
+			case Stone:
+				hero.x = first.x - 20;
 			default:
-				var h = (hero.x * first.pushPower + first.x * hero.pushPower) / (hero.pushPower + first.pushPower);
+				var tpower = (hero.pushPower + first.pushPower);
+				var h = (hero.x * first.pushPower + first.x * hero.pushPower) / tpower;
 				hero.x = h - 10;
 				first.x = h + 10;
-				if( Key.isToggled("A".code) || Key.isToggled("Q".code) )
-					hero.action(first);
 			}
 		}
 		
-		var tx = -Math.max(hero.x - scene.width * 0.5, 0);
+		if( Key.isToggled("A".code) || Key.isToggled("Q".code) )
+			hero.action(first);
+		if( Key.isToggled("Z".code) || Key.isToggled("W".code) )
+			hero.block();
+		
+		
+		var tx = -Math.max(hero.x - scene.width * 0.2, 0);
 		var ws = Math.pow(0.5, dt);
 		world.x = Std.int(world.x * ws + (1 - ws) * tx);
 		
@@ -156,6 +194,10 @@ class Game {
 				waveDist += dist;
 				wavePos++;
 			}
+		case Chest(kind, text):
+			var f = new Fighter(FChest(kind,text));
+			f.x = waveDist + 300;
+			wavePos++;
 		case End:
 		}
 		
@@ -164,20 +206,30 @@ class Game {
 				todo.remove(t);
 				
 		var vt = nextTime - haxe.Timer.stamp();
+		if( vt < 0.2 ) gameOver();
 		if( vt < 0 ) vt = 0;
 		remTime.text = Std.int(vt) + "'" + StringTools.rpad("" + Std.int((vt - Std.int(vt)) * 100), "0", 2);
 		var k = Std.int(vt * 255 / 10);
-		remTime.textColor = 0xFF0000 | (k << 8) | k;
+		remTime.textColor = isGameOver ? 0 : (0xFF0000 | (k << 8) | k);
 		
 		scene.setElapsedTime(dt / 60);
 		engine.render(scene);
+	}
+	
+	function gameOver() {
+		if( !isGameOver ) {
+			isGameOver = true;
+			trace("GAME-OVER");
+		}
 	}
 	
 	function popText( text : String, color : Int, ?cond ) {
 		var t = newText();
 		t.text = text;
 		t.x = (t.stage.stageWidth - t.textWidth) * 0.5;
-		t.y = (t.stage.stageHeight - t.textHeight) * 0.5;
+		t.y = 480;
+		if( cond == null )
+			t.alpha = 2;
 		todo.push(function(dt) {
 			if( cond != null && cond() )
 				cond = null;

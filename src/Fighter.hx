@@ -1,8 +1,17 @@
+
+enum CKind {
+	Shield;
+}
+
 enum FKind {
 	Hero;
 	Slime;
 	Goblin;
 	Time;
+	FChest( c : CKind, text : String );
+	Fireball;
+	Wizard;
+	Stone;
 }
 
 class Fighter {
@@ -20,6 +29,8 @@ class Fighter {
 	public var attackPower : Float;
 	public var life : Float;
 	public var maxLife : Float;
+	
+	var defaultRes : hxd.Resource.BitmapRes;
 	
 	public function new(k) {
 		this.kind = k;
@@ -40,27 +51,59 @@ class Fighter {
 		life = 10;
 		var size = 32;
 		var center = false;
-		var res = switch( kind ) {
+		switch( kind ) {
 		case Hero:
 			moveSpeed = 4;
-			hxd.Resource.embed("gfx/hero.png");
 		case Slime:
 			pushPower = 0.8;
-			hxd.Resource.embed("gfx/slime.png");
 		case Goblin:
 			life = 50;
 			pushPower = 1.5;
-			hxd.Resource.embed("gfx/monster.png");
 		case Time:
+			life = 0;
 			center = true;
 			anim.y -= 16;
-			hxd.Resource.embed("gfx/timeBonus.png");
+		case Wizard:
+			moveSpeed = 0;
+		case Fireball:
+			life = 0;
+			moveSpeed = 2;
+		case Stone:
+			size = 64;
+			anim.speed = 0;
+			life = 200;
+			moveSpeed = 0;
+			pushPower = 1000000;
+		case FChest(k,_):
 		}
+		var res = switch( kind ) {
+		case Hero:
+			hxd.Resource.embed("gfx/hero.png");
+		case Slime:
+			hxd.Resource.embed("gfx/slime.png");
+		case Goblin:
+			hxd.Resource.embed("gfx/monster.png");
+		case Time:
+			hxd.Resource.embed("gfx/timeBonus.png");
+		case FChest(k,_):
+			switch(k) {
+			case Shield:
+				hxd.Resource.embed("gfx/shield.png");
+			}
+		case Fireball:
+			hxd.Resource.embed("gfx/fireBall.png");
+		case Wizard:
+			hxd.Resource.embed("gfx/wizard.png");
+		case Stone:
+			hxd.Resource.embed("gfx/stone.png");
+		};
 		maxLife = life;
+		defaultRes = res;
 		play(res, size, center);
 	}
 	
-	public function play(res:hxd.Resource.BitmapRes, size=32, center=false) {
+	public function play(?res:hxd.Resource.BitmapRes, size = 32, center = false) {
+		if( res == null ) res = defaultRes;
 		var t = res.toTile();
 		var cy = center ? size >> 1 : size;
 		anim.play([for( a in t.split(Std.int(t.height/size), true) ) a.center(t.width>>1, cy)]);
@@ -89,17 +132,24 @@ class Fighter {
 		switch( kind ) {
 		case Time:
 			anim.rotation += 0.1 * dt;
+		case Stone:
+			anim.currentFrame = 4 * (1 - life / maxLife);
 		default:
 		}
 		return true;
 	}
 	
-	public function kill() {
+	public function remove() {
 		game.fighters.remove(this);
+		anim.remove();
+	}
+	
+	public function kill() {
 		var dr = 0.;
 		var dx = 5. + Math.random() * 3, dy = -(8. + Math.random() * 3);
-		anim.remove();
-		var bmp = new h2d.Bitmap(anim.getFrame().center(16,16), game.fightCont);
+		remove();
+		var frame = anim.getFrame();
+		var bmp = new h2d.Bitmap(frame == null ? null : frame.center(16,16), game.fightCont);
 		bmp.x = anim.x;
 		bmp.y = anim.y - 16;
 		bmp.scaleX = anim.scaleX;
@@ -108,6 +158,11 @@ class Fighter {
 		switch( kind ) {
 		case Time:
 			bmp.y += 16;
+		case FChest(_):
+			bmp.remove();
+			return;
+		case Stone:
+			bmp.y -= 16*2;
 		default:
 		}
 		game.todo.push(function(dt) {
@@ -116,6 +171,10 @@ class Fighter {
 				bmp.scale(1.02 * dt);
 				bmp.rotation += 0.1 * dt;
 				bmp.alpha -= 0.02 * dt;
+				if( bmp.alpha < 0 )
+					return false;
+			case Stone:
+				bmp.alpha -= 0.05 * dt;
 				if( bmp.alpha < 0 )
 					return false;
 			default:

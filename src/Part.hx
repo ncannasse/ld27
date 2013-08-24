@@ -6,6 +6,7 @@ class Part extends h2d.SpriteBatch.BatchElement {
 	public var ds : Float;
 	public var z : Float;
 	public var gravity : Float;
+	public var bounce = 0.7;
 	public function new(e, x, y) {
 		super(e);
 		scale = 0.25;
@@ -37,7 +38,7 @@ class Part extends h2d.SpriteBatch.BatchElement {
 		if( gravity > 0 && y > Game.BASEY + z ) {
 			dx *= 0.95;
 			y = Game.BASEY + z;
-			dy = -dy * 0.7;
+			dy = -dy * bounce;
 		}
 		return true;
 	}
