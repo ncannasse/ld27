@@ -11,7 +11,7 @@ enum Wave {
 @:publicFields
 class Game {
 	
-	static inline var BASEY = 180;
+	static inline var BASEY = 130;
 	
 	
 	var wavesData : Array<Wave>;
@@ -24,6 +24,8 @@ class Game {
 	var stones : h2d.SpriteBatch;
 	var world : h2d.Sprite;
 	var bg : h2d.Sprite;
+	var bg2 : h2d.Sprite;
+	var bg3 : h2d.Sprite;
 	var font : h2d.Font;
 	
 	var todo : Array < Float -> Bool >;
@@ -73,17 +75,36 @@ class Game {
 		world = new h2d.Sprite(scene);
 		
 		bg = new h2d.Sprite(world);
+		bg2 = new h2d.Sprite(bg);
+		bg3 = new h2d.Sprite(bg);
 		
 		todo = [];
 		
-		var sbg = hxd.Resource.embed("gfx/bg.png").toTile();
-		for( i in 0...20 ) {
+		
+		
+		var sbg = hxd.Resource.embed("gfx/bg1.png").toTile();
+		for( i in 0...40 ) {
 			var b = new h2d.Bitmap(sbg, bg);
-			var flip = i & 1 == 1;
-			b.scaleX = flip ? -1 : 1;
-			b.x = flip ? (i + 1) * sbg.width : i * sbg.width;
+			b.x = i * sbg.width;
+			b.colorKey = 0x5E016D;
+			b.y = scene.height - sbg.height;
 		}
+		
+		var sbg = hxd.Resource.embed("gfx/bg.png").toTile();
+		for( i in 0...40 ) {
+			var b = new h2d.Bitmap(sbg, bg3);
+			b.x = i * sbg.width;
+			b.colorKey = 0x5E016D;
+			b.y = scene.height - sbg.height - 49;
+		}
+		
 
+		var sbg = hxd.Resource.embed("gfx/bg2.png").toTile();
+		for( i in 0...40 ) {
+			var b = new h2d.Bitmap(sbg, bg2);
+			b.x = i * sbg.width;
+		}
+		
 		fightCont = new h2d.Sprite(world);
 		
 		fighters = [];
@@ -104,7 +125,7 @@ class Game {
 		
 		remTime = newText();
 		remTime.x = 120;
-		remTime.y = 550;
+		remTime.y = 400;
 		
 		nextTime = haxe.Timer.stamp() + 10;
 		
@@ -147,6 +168,7 @@ class Game {
 			case FChest(kind,text):
 				popText(text, 0xE1E6FF);
 				first.kill();
+				hero.inventory.push(kind);
 			case Fireball:
 				if( first.x <= hero.x + 10 ) {
 					if( !hero.blocking )
@@ -167,13 +189,15 @@ class Game {
 		
 		if( Key.isToggled("A".code) || Key.isToggled("Q".code) )
 			hero.action(first);
-		if( Key.isToggled("Z".code) || Key.isToggled("W".code) )
+		if( (Key.isToggled("Z".code) || Key.isToggled("W".code)) && hero.has(Shield) )
 			hero.block();
 		
 		
 		var tx = -Math.max(hero.x - scene.width * 0.2, 0);
 		var ws = Math.pow(0.5, dt);
 		world.x = Std.int(world.x * ws + (1 - ws) * tx);
+		bg3.x = -world.x * 0.3;
+		bg2.x = -world.x * 0.8;
 		
 		switch( wavesData[wavePos] ) {
 		case Tuto(text, cond):
@@ -227,7 +251,7 @@ class Game {
 		var t = newText();
 		t.text = text;
 		t.x = (t.stage.stageWidth - t.textWidth) * 0.5;
-		t.y = 480;
+		t.y = 330;
 		if( cond == null )
 			t.alpha = 2;
 		todo.push(function(dt) {

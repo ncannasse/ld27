@@ -70,6 +70,7 @@ class Fighter {
 			moveSpeed = 2;
 		case Stone:
 			size = 64;
+			anim.y += 4;
 			anim.speed = 0;
 			life = 200;
 			moveSpeed = 0;

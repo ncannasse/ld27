@@ -7,13 +7,19 @@ class Hero extends Fighter {
 	
 	public var slow : Float;
 	public var blocking : Bool;
+	public var inventory : Array<Fighter.CKind>;
 	
 	public function new() {
 		super(Hero);
+		inventory = [];
 		anim.x = -16;
 		anim.scaleX = 1;
 		pause = 0;
 		slow = 0;
+	}
+	
+	public function has(c:Fighter.CKind) {
+		return Lambda.has(inventory, c);
 	}
 	
 	override function update(dt:Float) {

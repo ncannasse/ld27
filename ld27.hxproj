@@ -7,7 +7,7 @@
     <movie path="ld27.swf" />
     <movie fps="60" />
     <movie width="750" />
-    <movie height="600" />
+    <movie height="450" />
     <movie version="11" />
     <movie minorVersion="7" />
     <movie platform="Flash Player" />

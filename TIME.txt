@@ -7,3 +7,5 @@ Day1:
 12:30-14:00 some code + particles
 14:00-14:30 lunch
 14:30-16:30 first wave + time up
+16:30-18:30 two more waves + shield
+18:30-19:30 scrolling parallax
