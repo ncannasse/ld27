@@ -38,12 +38,12 @@ class Game {
 	var remTime : flash.text.TextField;
 	
 	var isGameOver : Bool;
+	var allTexts : Array<flash.text.TextField>;
 	
 	public function new(e) {
 		
 		var french = hxd.System.lang == "fr";
 		wavesData = [
-		/*
 			M(Slime,0),
 			Tuto("Press "+(french?"A":"Q")+" to attack monsters", function() return fighters.length == 1),
 			M(Slime, 200, 3),
@@ -52,7 +52,6 @@ class Game {
 			M(Goblin, 300, 1),
 			M(Time, 200),
 			Wait(500),
-		*/
 			Chest(Shield, "Use " + (french?"Z":"W") + " to protect yourself"),
 			Wait(300),
 			M(Fireball, 200, 3),
@@ -82,6 +81,7 @@ class Game {
 		bg3 = new h2d.Sprite(bg);
 		
 		todo = [];
+		allTexts = [];
 		
 		
 		
@@ -155,6 +155,7 @@ class Game {
 		t.width = 1000;
 		t.selectable = false;
 		t.textColor = 0xFFFFFF;
+		allTexts.push(t);
 		return t;
 	}
 	
@@ -257,15 +258,41 @@ class Game {
 		engine.render(scene);
 	}
 	
+	function dispose() {
+		scene.dispose();
+		for( t in allTexts )
+			if( t.parent != null )
+				t.parent.removeChild(t);
+	}
+	
 	function gameOver() {
 		if( !isGameOver ) {
 			isGameOver = true;
-			trace("GAME-OVER");
+			hero.moveSpeed = 0;
+			hero.pause = 1e10;
+			hero.slow = 1e10;
+			hero.play();
+			hero.anim.speed = 0;
+			hero.anim.currentFrame = 1;
+			var wait = 0.;
+			var t;
+			popText("Game Over", 0xFF0000, function() {
+				wait += Timer.deltaT * 4;
+				nextTime = haxe.Timer.stamp() + wait;
+				if( wait > 10 ) {
+					dispose();
+					inst = new Game(engine);
+					inst.init();
+					return true;
+				}
+				return false;
+			});
 		}
 	}
 	
 	function popText( text : String, color : Int, ?cond ) {
 		var t = newText();
+		t.textColor = color;
 		t.text = text;
 		t.x = (t.stage.stageWidth - t.textWidth) * 0.5;
 		t.y = 330;
@@ -274,10 +301,16 @@ class Game {
 		todo.push(function(dt) {
 			if( cond != null && cond() )
 				cond = null;
-			if( cond == null )
+			if( cond == null ) {
 				t.alpha -= 0.02 * dt;
-			return t.alpha > 0;
+				if( t.alpha <= 0 ) {
+					t.parent.removeChild(t);
+					return false;
+				}
+			}
+			return true;
 		});
+		return t;
 	}
 	
 	static var inst : Game;
