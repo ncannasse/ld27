@@ -5,3 +5,5 @@ Day1:
 11:45-12:00 test monster gfx
 12:00-12:30 h2d changes (colorKey, Anim) , moving hero/monster
 12:30-14:00 some code + particles
+14:00-14:30 lunch
+14:30-16:30 first wave + time up
