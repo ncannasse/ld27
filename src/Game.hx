@@ -1,159 +1,109 @@
 typedef K = hxd.Key;
 
-class Part extends h2d.SpriteBatch.BatchElement {
-	public var dx : Float;
-	public var dy : Float;
-	public var dr : Float;
-	public var z : Float;
-	public function new(r, x, y) {
-		super(r);
-		scale = 0.25;
-		alpha = 0.5;
-		z = (Math.random() + 0.5) * 16;
-		this.x = x + (Math.random() - 0.5) * 16;
-		this.y = y + Math.random() * 16;
-		this.dx = (Math.random() - 0.5) * 5;
-		this.dy = -(1 + Math.random() * 4) * 2;
-	}
-	override function update(et:Float) {
-		var dt = et * 60;
-		dx *= Math.pow(0.95, dt);
-		dy += dt;
-		scale *= Math.pow(0.97 , dt);
-		x += dx * dt;
-		y += dy * dt;
-		var dr = (dx * dx + dy * dy) * 0.1;
-		rotation += dr;
-		if( dr < 0.1 ) {
-			alpha -= 0.02 * dt;
-			if( alpha < 0 )
-				return false;
-		}
-		if( y > Game.BASEY + z ) {
-			dx *= 0.95;
-			y = Game.BASEY + z;
-			dy = -dy * 0.7;
-		}
-		return true;
-	}
-}
-
-class Fighter {
-
-	var game : Game;
-	var anim : h2d.Anim;
-	var isHero : Bool;
-	public var moveSpeed : Float;
-	public var power : Float;
-	public var x(get, set) : Float;
-
-	public var pause : Float;
-	public var push : Float;
-	
-	public function new() {
-		game = Game.inst;
-		anim = new h2d.Anim(game.fightCont);
-		anim.colorKey = 0x5E016D;
-		anim.speed = 20 + Math.random() - 0.5;
-		anim.currentFrame = Math.random() * 8;
-		anim.y = Game.BASEY;
-		power = 1.5;
-		anim.scaleX = -1;
-		moveSpeed = 4;
-		push = 0;
-		pause = 0;
-		game.fighters.push(this);
-	}
-	
-	public function play(res:hxd.Resource.BitmapRes) {
-		anim.play([for( a in res.toTile().split(4, true) ) a.sub(0, 0, a.width, a.height, -16, -32)]);
-	}
-	
-	public function get_x() {
-		return anim.x;
-	}
-	public function set_x(v) {
-		return anim.x = v;
-	}
-	
-	public function update(dt:Float) {
-		var pp = Math.max(5 * dt, Math.abs(push) * 0.25);
-		if( push > 0 ) {
-			var dx = push > pp ? pp : push;
-			push -= dx;
-			x += dx;
-		} else if( push < 0 ) {
-			var dx = push < -pp ? -pp : push;
-			push -= dx;
-			x += dx;
-		}
-		pause -= dt;
-		x += moveSpeed * dt * anim.scaleX;
-	}
-	
-}
-
-class Hero extends Fighter {
-
-	public function new() {
-		super();
-		anim.x = -16;
-		anim.scaleX = 1;
-		power = 1;
-		pause = 0;
-	}
-	
-	public function action( m : Fighter ) {
-		if( pause > 0 )
-			return false;
-		m.push += 40;
-		for( i in 0...10 )
-			game.expl.add(new Part(game.expl.tile,m.x + 20,m.anim.y));
-		return true;
-	}
-	
+enum Wave {
+	Tuto( t : String, cond : Void -> Bool );
+	M( m : Fighter.FKind, dist : Int, ?count : Int );
+	Wait( dist : Int );
+	End;
 }
 
 @:publicFields
 class Game {
 	
 	static inline var BASEY = 180;
-
+	
+	
+	var wavesData : Array<Wave>;
 	var fighters : Array<Fighter>;
 	var fightCont : h2d.Sprite;
 	var engine : h3d.Engine;
 	var scene : h2d.Scene;
 	var hero : Hero;
-	var monster : Fighter;
 	var expl : h2d.SpriteBatch;
+	var world : h2d.Sprite;
+	var bg : h2d.Sprite;
+	var font : h2d.Font;
 	
+	var todo : Array < Float -> Bool >;
+	var wavePos : Int;
+	var waveCount : Int;
+	var waveDist : Int;
+	
+	var nextTime : Float;
+	var remTime : flash.text.TextField;
 	
 	public function new(e) {
 		this.engine = e;
+		h2d.Font.embed("Verdana", "gfx/Verdana.ttf");
+		font = new h2d.Font("Verdana", 32);
+		font.halfSize();
 		scene = new h2d.Scene();
 		scene.setFixedSize(Std.int(hxd.System.width / 3), Std.int(hxd.System.height / 3));
 	}
 		
 	public function init() {
-		new h2d.Bitmap(hxd.Resource.embed("gfx/bg.png").toTile(), scene);
+		
+		
+		wavesData = [
+			M(Slime,0),
+			Tuto("Press Q to attack monsters", function() return fighters.length == 1),
+			M(Slime, 200, 3),
+			M(Goblin, 300),
+			Tuto("Hit Q faster!", function() return fighters.length == 1),
+			M(Goblin, 300, 2),
+			M(Time, 200),
+			End,
+		];
+		
+		world = new h2d.Sprite(scene);
+		
+		bg = new h2d.Sprite(world);
+		
+		todo = [];
+		
+		var sbg = hxd.Resource.embed("gfx/bg.png").toTile();
+		for( i in 0...20 ) {
+			var b = new h2d.Bitmap(sbg, bg);
+			var flip = i & 1 == 1;
+			b.scaleX = flip ? -1 : 1;
+			b.x = flip ? (i + 1) * sbg.width : i * sbg.width;
+		}
 
-		fightCont = new h2d.Sprite(scene);
+		fightCont = new h2d.Sprite(world);
 		
 		fighters = [];
 		
 		hero = new Hero();
-		hero.play(hxd.Resource.embed("gfx/hero.png"));
-		monster = new Fighter();
-		monster.play(hxd.Resource.embed("gfx/monster.png"));
-		monster.x = 250;
 
-		expl = new h2d.SpriteBatch(hxd.Resource.embed("gfx/explode.png").toTile().center(16,16), scene);
+		expl = new h2d.SpriteBatch(hxd.Resource.embed("gfx/explode.png").toTile().center(16,16), world);
 		expl.hasRotationScale = true;
 		expl.hasUpdate = true;
 		expl.blendMode = Add;
+		expl.color = new h3d.Vector(1, 0.6, 0., 1);
+		
+		
+		remTime = newText();
+		remTime.x = 350;
+		remTime.y = 550;
+		
+		nextTime = haxe.Timer.stamp() + 10;
 		
 		update();
 		hxd.System.setLoop(update);
+	}
+	
+	function newText() {
+		var t = new flash.text.TextField();
+		flash.Lib.current.addChild(t);
+		var fmt = t.defaultTextFormat;
+		fmt.font = "Verdana";
+		fmt.size = 24;
+		t.defaultTextFormat = fmt;
+		t.filters = [new flash.filters.GlowFilter(0, 0.5, 2, 2, 10)];
+		t.width = 1000;
+		t.selectable = false;
+		t.textColor = 0xFFFFFF;
+		return t;
 	}
 	
 	function update() {
@@ -167,17 +117,74 @@ class Game {
 				first = f;
 		}
 		
-		if( hero.x > first.x - 20 ) {
-			var h = (hero.x * first.power + first.x * hero.power) / (hero.power + first.power);
-			hero.x = h - 10;
-			first.x = h + 10;
-			
-			if( Key.isToggled("A".code) || Key.isToggled("Q".code) )
-				hero.action(first);
+	
+		if( first != null && hero.x > first.x - 20 ) {
+			switch( first.kind ) {
+			case Time:
+				popText("Time UP!", 0xE1E6FF);
+				nextTime = haxe.Timer.stamp() + 10;
+				first.kill();
+			default:
+				var h = (hero.x * first.pushPower + first.x * hero.pushPower) / (hero.pushPower + first.pushPower);
+				hero.x = h - 10;
+				first.x = h + 10;
+				if( Key.isToggled("A".code) || Key.isToggled("Q".code) )
+					hero.action(first);
+			}
 		}
+		
+		var tx = -Math.max(hero.x - scene.width * 0.5, 0);
+		var ws = Math.pow(0.5, dt);
+		world.x = Std.int(world.x * ws + (1 - ws) * tx);
+		
+		switch( wavesData[wavePos] ) {
+		case Tuto(text, cond):
+			popText(text, 0xFFFFFF, cond);
+			wavePos++;
+		case M(kind, dist, count):
+			if( (-tx) - waveDist >= dist ) {
+				new Fighter(kind).x = waveDist + dist + 300;
+				waveDist += dist;
+				if( count == null || count == waveCount+1 ) {
+					wavePos++;
+					waveCount = 0;
+				} else
+					waveCount++;
+			}
+		case Wait(dist):
+			if( ( -tx) - waveDist >= dist ) {
+				waveDist += dist;
+				wavePos++;
+			}
+		case End:
+		}
+		
+		for( t in todo.copy() )
+			if( !t(dt) )
+				todo.remove(t);
+				
+		var vt = nextTime - haxe.Timer.stamp();
+		if( vt < 0 ) vt = 0;
+		remTime.text = Std.int(vt) + "'" + StringTools.rpad("" + Std.int((vt - Std.int(vt)) * 100), "0", 2);
+		var k = Std.int(vt * 255 / 10);
+		remTime.textColor = 0xFF0000 | (k << 8) | k;
 		
 		scene.setElapsedTime(dt / 60);
 		engine.render(scene);
+	}
+	
+	function popText( text : String, color : Int, ?cond ) {
+		var t = newText();
+		t.text = text;
+		t.x = (t.stage.stageWidth - t.textWidth) * 0.5;
+		t.y = (t.stage.stageHeight - t.textHeight) * 0.5;
+		todo.push(function(dt) {
+			if( cond != null && cond() )
+				cond = null;
+			if( cond == null )
+				t.alpha -= 0.02 * dt;
+			return t.alpha > 0;
+		});
 	}
 	
 	static var inst : Game;
