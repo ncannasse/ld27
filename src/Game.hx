@@ -50,8 +50,8 @@ class Game {
 			M(Goblin, 300),
 			Tuto("Hit "+(french?"A":"Q")+" faster!", function() return fighters.length == 1),
 			M(Goblin, 300, 1),
-			M(Time, 200),
 			
+			M(Time, 200),
 			Wait(500),
 			Chest(Slide, "Use "+(french?"Z":"W")+" to slide"),
 			Wait(300),
@@ -65,22 +65,35 @@ class Game {
 			M(Stone, 300),
 			Wait(300),
 			M(Goblin, 150, 2),
-			M(Time, 300),
 			
+			M(Time, 300),
 			Wait(500),
 			Chest(Shield, "Use E to protect yourself"),
 			Wait(300),
 			M(Fireball, 200, 3),
 			M(Wizard, 50),
-			M(Time, 200),
 			
-			Wait(50),
-			M(Fireball, 150, 3),
-			M(Wizard, 50),
-			Wait(50),
-			M(Fireball, 150, 3),
-			M(Wizard, 50),
 			M(Time, 200),
+			Wait(50),
+			M(Fireball, 150, 3),
+			M(Wizard, 50),
+			Wait(50),
+			M(Fireball, 150, 3),
+			M(Wizard, 50),
+			
+			
+			M(Time, 200),
+			Wait(100),
+			M(Crow, 40, 3),
+			M(Stone, 200),
+			Wait(150),
+			M(Fireball,100, 3),
+			M(Wizard, 50),
+			
+			
+			M(Time, 100),
+			Wait(500),
+			//Chest(
 			
 			End,
 		];
@@ -220,7 +233,7 @@ class Game {
 		if( Key.isToggled("E".code) && hero.has(Shield) )
 			hero.block();
 			
-		if( Key.isToggled("R".code) ) {
+		if( Key.isToggled(27) ) {
 			haxe.Timer.delay(function() {
 				dispose();
 				inst = new Game(engine);
