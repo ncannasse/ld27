@@ -17,7 +17,7 @@ enum FKind {
 class Fighter {
 
 	var game : Game;
-	var anim : h2d.Anim;
+	public var anim : h2d.Anim;
 	public var kind : FKind;
 	public var moveSpeed : Float;
 	public var pushPower : Float;
@@ -210,7 +210,7 @@ class Fighter {
 		var k = 0.;
 		
 		game.todo.push(function(dt) {
-			spr.y -= 100 * dt / (k + 10);
+			t.y -= 100 * dt / (k + 10);
 			k += dt;
 			spr.rotate(spr.rotation * 0.03 * dt);
 			t.alpha -= 0.04 * dt;

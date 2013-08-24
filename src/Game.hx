@@ -21,6 +21,7 @@ class Game {
 	var scene : h2d.Scene;
 	var hero : Hero;
 	var expl : h2d.SpriteBatch;
+	var fire : h2d.SpriteBatch;
 	var stones : h2d.SpriteBatch;
 	var world : h2d.Sprite;
 	var bg : h2d.Sprite;
@@ -42,6 +43,7 @@ class Game {
 		
 		var french = hxd.System.lang == "fr";
 		wavesData = [
+		/*
 			M(Slime,0),
 			Tuto("Press "+(french?"A":"Q")+" to attack monsters", function() return fighters.length == 1),
 			M(Slime, 200, 3),
@@ -50,6 +52,7 @@ class Game {
 			M(Goblin, 300, 1),
 			M(Time, 200),
 			Wait(500),
+		*/
 			Chest(Shield, "Use " + (french?"Z":"W") + " to protect yourself"),
 			Wait(300),
 			M(Fireball, 200, 3),
@@ -111,7 +114,9 @@ class Game {
 		
 		hero = new Hero();
 
-		expl = new h2d.SpriteBatch(hxd.Resource.embed("gfx/explode.png").toTile().center(16,16), world);
+		var rexpl = hxd.Resource.embed("gfx/explode.png");
+		
+		expl = new h2d.SpriteBatch(rexpl.toTile().center(16,16), world);
 		expl.hasRotationScale = true;
 		expl.hasUpdate = true;
 		expl.blendMode = Add;
@@ -122,6 +127,12 @@ class Game {
 		stones.colorKey = 0x5E016D;
 		stones.hasRotationScale = true;
 		stones.hasUpdate = true;
+
+		fire = new h2d.SpriteBatch(rexpl.toTile().center(16,16), world);
+		fire.hasRotationScale = true;
+		fire.hasUpdate = true;
+		fire.blendMode = Add;
+		fire.color = new h3d.Vector(1, 0., 0., 1);
 		
 		remTime = newText();
 		remTime.x = 120;
@@ -176,6 +187,12 @@ class Game {
 					else
 						hero.slow *= 0.5;
 					first.remove();
+					for( i in 0...10 ) {
+						var p = new Part(fire.tile, first.x + 20, first.anim.y);
+						p.gravity *= 0.7;
+						p.dy *= 0.8;
+						fire.add(p);
+					}
 				}
 			case Stone:
 				hero.x = first.x - 20;
@@ -196,7 +213,7 @@ class Game {
 		var tx = -Math.max(hero.x - scene.width * 0.2, 0);
 		var ws = Math.pow(0.5, dt);
 		world.x = Std.int(world.x * ws + (1 - ws) * tx);
-		bg3.x = -world.x * 0.3;
+		bg3.x = -world.x * 0.15;
 		bg2.x = -world.x * 0.8;
 		
 		switch( wavesData[wavePos] ) {
