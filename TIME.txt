@@ -1,11 +1,20 @@
 Day1:
 
 10:00 Start
+
 10:00-11:45 Base Run Animation
 11:45-12:00 test monster gfx
 12:00-12:30 h2d changes (colorKey, Anim) , moving hero/monster
 12:30-14:00 some code + particles
+
 14:00-14:30 lunch
+
 14:30-16:30 first wave + time up
 16:30-18:30 two more waves + shield
 18:30-19:30 scrolling parallax
+19:30-19:40 gameOver
+
+19:40-21:30 diner
+
+21:30-22:20 hourglass gfx, slide, crow
+

@@ -1,6 +1,7 @@
 
 enum CKind {
 	Shield;
+	Slide;
 }
 
 enum FKind {
@@ -8,15 +9,18 @@ enum FKind {
 	Slime;
 	Goblin;
 	Time;
+	Magic;
 	FChest( c : CKind, text : String );
 	Fireball;
 	Wizard;
 	Stone;
+	Crow;
 }
 
 class Fighter {
 
 	var game : Game;
+	public var skip : Bool;
 	public var anim : h2d.Anim;
 	public var kind : FKind;
 	public var moveSpeed : Float;
@@ -61,6 +65,10 @@ class Fighter {
 			pushPower = 1.5;
 		case Time:
 			life = 0;
+			moveSpeed = 0;
+		case Magic:
+			life = 0;
+			moveSpeed = 0;
 			center = true;
 			anim.y -= 16;
 		case Wizard:
@@ -75,7 +83,12 @@ class Fighter {
 			life = 200;
 			moveSpeed = 0;
 			pushPower = 1000000;
-		case FChest(k,_):
+		case Crow:
+			moveSpeed = 1.5;
+			life = 40;
+		case FChest(k, _):
+			moveSpeed = 0;
+			life = 0;
 		}
 		var res = switch( kind ) {
 		case Hero:
@@ -85,11 +98,15 @@ class Fighter {
 		case Goblin:
 			hxd.Resource.embed("gfx/monster.png");
 		case Time:
-			hxd.Resource.embed("gfx/timeBonus.png");
+			hxd.Resource.embed("gfx/hourglass.png");
+		case Magic:
+			null;// hxd.Resource.embed("gfx/timeBonus.png");
 		case FChest(k,_):
 			switch(k) {
 			case Shield:
 				hxd.Resource.embed("gfx/shield.png");
+			case Slide:
+				hxd.Resource.embed("gfx/timeBonus.png");
 			}
 		case Fireball:
 			hxd.Resource.embed("gfx/fireBall.png");
@@ -97,6 +114,8 @@ class Fighter {
 			hxd.Resource.embed("gfx/wizard.png");
 		case Stone:
 			hxd.Resource.embed("gfx/stone.png");
+		case Crow:
+			hxd.Resource.embed("gfx/crow.png");
 		};
 		maxLife = life;
 		defaultRes = res;
@@ -131,7 +150,7 @@ class Fighter {
 		pause -= dt;
 		x += moveSpeed * dt * anim.scaleX;
 		switch( kind ) {
-		case Time:
+		case Magic:
 			anim.rotation += 0.1 * dt;
 		case Stone:
 			anim.currentFrame = 4 * (1 - life / maxLife);
@@ -157,7 +176,7 @@ class Fighter {
 		bmp.colorKey = anim.colorKey;
 		bmp.rotation = anim.rotation;
 		switch( kind ) {
-		case Time:
+		case Magic:
 			bmp.y += 16;
 		case FChest(_):
 			bmp.remove();
@@ -168,13 +187,19 @@ class Fighter {
 		}
 		game.todo.push(function(dt) {
 			switch( kind ) {
-			case Time:
+			case Magic:
 				bmp.scale(1.02 * dt);
 				bmp.rotation += 0.1 * dt;
 				bmp.alpha -= 0.02 * dt;
 				if( bmp.alpha < 0 )
 					return false;
 			case Stone:
+				bmp.alpha -= 0.05 * dt;
+				if( bmp.alpha < 0 )
+					return false;
+			case Time:
+				bmp.y -= dt;
+				bmp.scale(Math.pow(0.97, dt));
 				bmp.alpha -= 0.05 * dt;
 				if( bmp.alpha < 0 )
 					return false;

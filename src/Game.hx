@@ -44,6 +44,7 @@ class Game {
 		
 		var french = hxd.System.lang == "fr";
 		wavesData = [
+		/*
 			M(Slime,0),
 			Tuto("Press "+(french?"A":"Q")+" to attack monsters", function() return fighters.length == 1),
 			M(Slime, 200, 3),
@@ -60,7 +61,17 @@ class Game {
 			M(Stone, 300),
 			Wait(300),
 			M(Goblin, 150, 2),
-			M(Time,300),
+		*/
+			M(Time, 300),
+			Wait(500),
+			Chest(Slide, "Use E to slide"),
+			Wait(300),
+			M(Crow, 40, 3),
+			Wait(200),
+			M(Crow, 40, 3),
+			Wait(200),
+			M(Crow, 40, 3),
+			M(Time, 200),
 			End,
 		];
 		
@@ -141,7 +152,6 @@ class Game {
 		nextTime = haxe.Timer.stamp() + 10;
 		
 		update();
-		hxd.System.setLoop(update);
 	}
 	
 	function newText() {
@@ -166,7 +176,7 @@ class Game {
 		var first : Fighter = null;
 		for( f in fighters.copy() ) {
 			f.update(dt);
-			if( f != hero && (first == null || f.x < first.x) )
+			if( !f.skip && (first == null || f.x < first.x) )
 				first = f;
 		}
 		
@@ -195,6 +205,8 @@ class Game {
 						fire.add(p);
 					}
 				}
+			case Crow if( hero.sliding ):
+				first.skip = true;
 			case Stone:
 				hero.x = first.x - 20;
 			default:
@@ -209,6 +221,8 @@ class Game {
 			hero.action(first);
 		if( (Key.isToggled("Z".code) || Key.isToggled("W".code)) && hero.has(Shield) )
 			hero.block();
+		if( Key.isToggled("E".code) )
+			hero.slide();
 		
 		
 		var tx = -Math.max(hero.x - scene.width * 0.2, 0);
@@ -258,11 +272,18 @@ class Game {
 		engine.render(scene);
 	}
 	
+	function cleanTexts(keepTime=false) {
+		for( t in allTexts )
+			if( t.parent != null ) {
+				if( keepTime && t == remTime ) continue;
+				t.parent.removeChild(t);
+			}
+		allTexts = keepTime ? [remTime] : [];
+	}
+	
 	function dispose() {
 		scene.dispose();
-		for( t in allTexts )
-			if( t.parent != null )
-				t.parent.removeChild(t);
+		cleanTexts();
 	}
 	
 	function gameOver() {
@@ -275,8 +296,9 @@ class Game {
 			hero.anim.speed = 0;
 			hero.anim.currentFrame = 1;
 			var wait = 0.;
-			var t;
-			popText("Game Over", 0xFF0000, function() {
+			var t = null;
+			cleanTexts(true);
+			t = popText("Game Over", 0xFF0000, function() {
 				wait += Timer.deltaT * 4;
 				nextTime = haxe.Timer.stamp() + wait;
 				if( wait > 10 ) {
@@ -321,6 +343,7 @@ class Game {
 		engine.onReady = function() {
 			inst = new Game(engine);
 			inst.init();
+			hxd.System.setLoop(function() inst.update());
 			Key.init();
 		};
 		engine.init();

@@ -5,12 +5,14 @@ class Hero extends Fighter {
 	var wait : Float;
 	var next : Void -> Void;
 	
+	public var sliding : Bool;
 	public var slow : Float;
 	public var blocking : Bool;
 	public var inventory : Array<Fighter.CKind>;
 	
 	public function new() {
 		super(Hero);
+		skip = true;
 		inventory = [];
 		anim.x = -16;
 		anim.scaleX = 1;
@@ -28,6 +30,7 @@ class Hero extends Fighter {
 		if( slow > 0 ) {
 			slow -= dt;
 			if( slow <= 0 ) {
+				sliding = false;
 				blocking = false;
 				moveSpeed = 4;
 				play();
@@ -52,6 +55,16 @@ class Hero extends Fighter {
 		slow = 30;
 		blocking = true;
 		moveSpeed = 0.1;
+	}
+
+	public function slide() {
+		if( pause > 0 )
+			return;
+		play(hxd.Resource.embed("gfx/hero_slide.png"));
+		pause = 30;
+		slow = 30;
+		sliding = true;
+		moveSpeed = 3;
 	}
 	
 	public function action( m : Fighter ) {
