@@ -54,7 +54,10 @@ class Background {
 		
 		// SKY
 		var sbg = [
-			{ r : hxd.Resource.embed("gfx/bg2.png"), n : 40 },
+			{ r : hxd.Resource.embed("gfx/bg2.png"), n : 1 },
+			{ r : hxd.Resource.embed("gfx/bg2a.png"), n : 1 },
+			{ r : hxd.Resource.embed("gfx/bg2b.png"), n : 1 },
+			{ r : hxd.Resource.embed("gfx/bg2c.png"), n : 1 },
 		];
 		var px = 0;
 		for( k in sbg ) {
