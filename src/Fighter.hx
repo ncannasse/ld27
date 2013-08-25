@@ -18,6 +18,7 @@ enum FKind {
 	LaserAnim;
 	Chain;
 	Boss;
+	Missile;
 }
 
 class Fighter {
@@ -96,7 +97,9 @@ class Fighter {
 			moveSpeed = 0;
 		case Boss:
 			life = 2000;
-			moveSpeed = 3.5;
+		case Missile:
+			life = 0;
+			moveSpeed = 1;
 		}
 		var res = switch( kind ) {
 		case Hero:
@@ -133,6 +136,8 @@ class Fighter {
 			hxd.Resource.embed("gfx/stone.png");
 		case Crow:
 			hxd.Resource.embed("gfx/crow.png");
+		case Missile:
+			hxd.Resource.embed("gfx/missile.png");
 		case Boss:
 			
 			mc.scale(1.5);

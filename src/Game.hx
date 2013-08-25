@@ -238,6 +238,26 @@ class Game {
 						fire.add(p);
 					}
 				}
+			case Missile:
+				if( first.x <= hero.x + 10 ) {
+					if( !hero.blocking )
+						hero.push -= 100;
+					else
+						hero.slow *= 0.25;
+					first.remove();
+					for( i in 0...20 ) {
+						var p = new Part(fire.tile, first.x + 20, first.mc.y);
+						p.gravity *= 0.7;
+						p.dy *= 0.8;
+						fire.add(p);
+					}
+					for( i in 0...20 ) {
+						var p = new Part(expl.tile, first.x + 20, first.mc.y);
+						p.gravity *= 0.7;
+						p.dy *= 0.8;
+						expl.add(p);
+					}
+				}
 			case Crow, Chain if( hero.sliding ):
 				first.skip = true;
 			case Stone:
@@ -284,8 +304,12 @@ class Game {
 			popText(text, 0xFFFFFF, cond);
 			wavePos++;
 		case M(kind, dist, count):
-			if( (-tx) - waveDist >= dist ) {
-				new Fighter(kind).x = waveDist + dist + 300;
+			if( ( -tx) - waveDist >= dist ) {
+				var f = switch( kind ) {
+				case Boss: new Boss();
+				default: new Fighter(kind);
+				}
+				f.x = waveDist + dist + 300;
 				waveDist += dist;
 				if( count == null || count == waveCount+1 ) {
 					wavePos++;

@@ -90,6 +90,7 @@ class Hero extends Fighter {
 		f.anim.alpha = 0.8;
 		var time = 0., hit = 0.;
 		game.todo.push(function(dt) {
+			this.push = 0;
 			time += dt;
 			var w = time > 40 ? -0.5 : 0.5;
 			f.anim.scaleX += dt * w;
@@ -98,8 +99,8 @@ class Hero extends Fighter {
 				return false;
 			}
 			hit += dt;
-			if( hit > 0.5 ) {
-				hit -= 0.5;
+			while( hit > 5 ) {
+				hit -= 5;
 				for( f in game.fighters.copy() )
 					if( !f.skip )
 						this.hit(f);
@@ -141,7 +142,12 @@ class Hero extends Fighter {
 			for( i in 0...4 )
 				game.expl.add(new Part.Boom(game.expl.tile, m.x + 30, m.anim.y - 10));
 		default:
-			m.push += 40;
+			switch( m.kind ) {
+			case Boss:
+				m.push -= 40;
+			default:
+				m.push += 40;
+			}
 			for( i in 0...10 )
 				game.expl.add(new Part(game.expl.tile, m.x + 20, m.anim.y));
 			for( i in 0...4 )
