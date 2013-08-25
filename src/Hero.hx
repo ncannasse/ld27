@@ -30,6 +30,8 @@ class Hero extends Fighter {
 		wait -= dt;
 		if( slow > 0 ) {
 			slow -= dt;
+			if( blocking )
+				moveSpeed *= Math.pow(0.95, dt);
 			if( slow <= 0 ) {
 				sliding = false;
 				blocking = false;
@@ -55,7 +57,6 @@ class Hero extends Fighter {
 		pause = 30;
 		slow = 30;
 		blocking = true;
-		moveSpeed = 0.1;
 	}
 
 	public function slide() {
@@ -65,7 +66,7 @@ class Hero extends Fighter {
 		pause = 30;
 		slow = 30;
 		sliding = true;
-		moveSpeed = 3;
+		moveSpeed = game.boss != null ? 6 : 3;
 	}
 	
 	public function laser() {
@@ -102,7 +103,7 @@ class Hero extends Fighter {
 			while( hit > 5 ) {
 				hit -= 5;
 				for( f in game.fighters.copy() )
-					if( !f.skip )
+					if( !f.skip && f.life > 0 && f.x < x + 400 && f.kind != Boss )
 						this.hit(f);
 			}
 			return true;
@@ -112,7 +113,7 @@ class Hero extends Fighter {
 	public function action( m : Fighter ) {
 		if( pause > 0 )
 			return;
-			
+		
 		if( m == null || m.x > x + 25 || m.maxLife == 0 ) {
 			pause = 20;
 			slow = 10.;
@@ -129,7 +130,7 @@ class Hero extends Fighter {
 		switch( m.kind ) {
 		case Stone:
 			for( i in 0...4 ) {
-				var p = new Part(game.stones.tile, m.x + 20, m.anim.y);
+				var p = new Part(game.stones.tile, m.x + 20, m.mc.y);
 				p.scale *= 2 + Math.random();
 				p.dx *= 2;
 				p.gravity *= 1.5;
@@ -140,18 +141,23 @@ class Hero extends Fighter {
 				game.stones.add(p);
 			}
 			for( i in 0...4 )
-				game.expl.add(new Part.Boom(game.expl.tile, m.x + 30, m.anim.y - 10));
+				game.expl.add(new Part.Boom(game.expl.tile, m.x + 30, m.mc.y - 10));
 		default:
+			var ex = 20.;
 			switch( m.kind ) {
 			case Boss:
-				m.push -= 40;
+				var dx = x - m.x;
+				if( dx < 25 || dx > 50 )
+					return;
+				ex += dx;
+				m.push -= 30;
 			default:
 				m.push += 40;
 			}
 			for( i in 0...10 )
-				game.expl.add(new Part(game.expl.tile, m.x + 20, m.anim.y));
+				game.expl.add(new Part(game.expl.tile, m.x + ex, m.mc.y));
 			for( i in 0...4 )
-				game.expl.add(new Part.Boom(game.expl.tile, m.x + 30, m.anim.y - 10));
+				game.expl.add(new Part.Boom(game.expl.tile, m.x + ex + 10, m.mc.y - 10));
 		}
 		
 		

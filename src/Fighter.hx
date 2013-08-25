@@ -99,7 +99,7 @@ class Fighter {
 			life = 2000;
 		case Missile:
 			life = 0;
-			moveSpeed = 1;
+			moveSpeed = 0;
 		}
 		var res = switch( kind ) {
 		case Hero:
@@ -222,6 +222,8 @@ class Fighter {
 			anim.currentFrame = 4 * (1 - life / maxLife);
 		case Chain:
 			anim.rotation = Math.sin(pause * 0.05) * 0.1;
+		case Missile:
+			moveSpeed += dt * 0.1;
 		default:
 		}
 		return true;
@@ -229,7 +231,7 @@ class Fighter {
 	
 	public function remove() {
 		game.fighters.remove(this);
-		anim.remove();
+		mc.remove();
 	}
 	
 	public function kill() {

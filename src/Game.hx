@@ -22,6 +22,7 @@ class Game {
 	var scene : h2d.Scene;
 	var hero : Hero;
 	var expl : h2d.SpriteBatch;
+	var smoke : h2d.SpriteBatch;
 	var fire : h2d.SpriteBatch;
 	var stones : h2d.SpriteBatch;
 	var world : h2d.Sprite;
@@ -40,6 +41,10 @@ class Game {
 	var isGameOver : Bool;
 	var allTexts : Array<flash.text.TextField>;
 	var prev : flash.text.TextField;
+	
+	var boss : Boss;
+	
+	var win : Bool;
 	
 	public function new(e,pos) {
 		
@@ -100,16 +105,20 @@ class Game {
 			Wait(200),
 			M(Goblin, 200),
 			
-			
-			
 			M(Time, 200),
-
-			M(Chain, 200, 10),
-
-			Resume,
+			M(Chain, 200, 4),
+			Wait(70),
+			M(Goblin, 50, 3),
+			M(Slime, 50, 5),
 			
-			M(Boss,100),
+			M(Time, 50),
 			
+			Wait(800),
+			Tuto("Warning ! Danger Approaching !"),
+			Wait(50),
+
+			M(Boss, 100),
+			M(Time, 500),
 		
 			End,
 		];
@@ -174,6 +183,12 @@ class Game {
 		fire.hasUpdate = true;
 		fire.blendMode = Add;
 		fire.color = new h3d.Vector(1, 0., 0., 1);
+
+		smoke = new h2d.SpriteBatch(hxd.Resource.embed("gfx/smoke.png").toTile().center(16,16), world);
+		smoke.colorKey = 0x5E016D;
+		smoke.hasRotationScale = true;
+		smoke.hasUpdate = true;
+		smoke.alpha = 0.5;
 		
 		remTime = newText();
 		remTime.x = 120;
@@ -210,6 +225,7 @@ class Game {
 				first = f;
 		}
 		
+		if( isGameOver && first != null && first.kind == Time ) first = null;
 	
 		if( first != null && hero.x > first.x - 20 ) {
 			switch( first.kind ) {
@@ -219,7 +235,7 @@ class Game {
 				popText("Time UP!"+(las?"\nLaser ready":""), 0xE1E6FF);
 				nextTime = haxe.Timer.stamp() + 10;
 				first.kill();
-				lastCheck = wavePos - 1;
+				if( boss == null ) lastCheck = wavePos - 1;
 			case FChest(kind,text):
 				popText(text, 0xE1E6FF);
 				first.kill();
@@ -243,7 +259,7 @@ class Game {
 					if( !hero.blocking )
 						hero.push -= 100;
 					else
-						hero.slow *= 0.25;
+						hero.slow *= 0.3;
 					first.remove();
 					for( i in 0...20 ) {
 						var p = new Part(fire.tile, first.x + 20, first.mc.y);
@@ -264,6 +280,8 @@ class Game {
 				hero.x = first.x - 20;
 			case Chain:
 				hero.push -= 50;
+			case Boss if( boss.step == Evade ):
+				// no recal
 			default:
 				var tpower = (hero.pushPower + first.pushPower);
 				var h = (hero.x * first.pushPower + first.x * hero.pushPower) / tpower;
@@ -306,7 +324,7 @@ class Game {
 		case M(kind, dist, count):
 			if( ( -tx) - waveDist >= dist ) {
 				var f = switch( kind ) {
-				case Boss: new Boss();
+				case Boss: boss = new Boss();
 				default: new Fighter(kind);
 				}
 				f.x = waveDist + dist + 300;
@@ -366,17 +384,30 @@ class Game {
 			hero.anim.speed = 0;
 			hero.anim.currentFrame = 1;
 			var wait = 0.;
-			popText("Game Over", 0xFF0000, function() {
-				wait += Timer.deltaT * 4;
-				nextTime = haxe.Timer.stamp() + wait;
-				if( wait > 10 ) {
-					dispose();
-					inst = new Game(engine, lastCheck);
-					inst.init();
-					return true;
-				}
-				return false;
-			});
+			if( win ) {
+				popText("Victory !!", 0x00FF00, function() {
+					wait += Timer.deltaT;
+					nextTime = haxe.Timer.stamp() + wait;
+					if( wait > 10 ) {
+						dispose();
+						trace("TITLE");
+						return true;
+					}
+					return false;
+				});
+			} else {
+				popText("Game Over", 0xFF0000, function() {
+					wait += Timer.deltaT * 4;
+					nextTime = haxe.Timer.stamp() + wait;
+					if( wait > 10 ) {
+						dispose();
+						inst = new Game(engine, lastCheck);
+						inst.init();
+						return true;
+					}
+					return false;
+				});
+			}
 		}
 	}
 	
