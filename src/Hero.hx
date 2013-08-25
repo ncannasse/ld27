@@ -156,7 +156,7 @@ class Hero extends Fighter {
 			switch( m.kind ) {
 			case Boss:
 				var dx = x - m.x;
-				if( dx < 25 || dx > 50 )
+				if( dx < 20 || dx > 50 )
 					return;
 				ex += dx;
 				m.push -= 30;

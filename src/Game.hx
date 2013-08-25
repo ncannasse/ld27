@@ -112,8 +112,10 @@ class Game {
 			M(Goblin, 50, 3),
 			M(Slime, 50, 5),
 			
-			M(Time, 50),
 			
+			M(Time, 50),
+						
+
 			Wait(800),
 			Tuto("Warning ! Danger Approaching !"),
 			Wait(50),
@@ -216,7 +218,6 @@ class Game {
 	}
 	
 	function update() {
-		Timer.update();
 		var dt = Timer.tmod;
 		
 		var first : Fighter = null;
@@ -371,6 +372,7 @@ class Game {
 	}
 	
 	function dispose() {
+		font.dispose();
 		scene.dispose();
 		cleanTexts();
 	}
@@ -391,7 +393,7 @@ class Game {
 					nextTime = haxe.Timer.stamp() + wait;
 					if( wait > 10 ) {
 						dispose();
-						trace("TITLE");
+						showTitle();
 						return true;
 					}
 					return false;
@@ -441,16 +443,36 @@ class Game {
 	}
 	
 	static var inst : Game;
+	static var title : Title;
+	static var _ENGINE : h3d.Engine;
+	
+	static function doUpdate() {
+		Timer.update();
+		if( inst != null )
+			inst.update();
+		else if( title != null )
+			title.update();
+	}
+
+	static function showTitle() {
+		title = new Title(_ENGINE);
+		inst = null;
+	}
+	
+	public static function start(pos = 0) {
+		inst = new Game(_ENGINE, pos);
+		inst.init();
+		title = null;
+	}
 	
 	public static function main() {
-		var engine = new h3d.Engine();
-		engine.backgroundColor = 0xFF808080;
-		engine.onReady = function() {
-			inst = new Game(engine, 0);
-			inst.init();
-			hxd.System.setLoop(function() inst.update());
+		_ENGINE = new h3d.Engine();
+		_ENGINE.backgroundColor = 0xFF808080;
+		_ENGINE.onReady = function() {
+			showTitle();
+			hxd.System.setLoop(doUpdate);
 			Key.init();
 		};
-		engine.init();
+		_ENGINE.init();
 	}
 }
