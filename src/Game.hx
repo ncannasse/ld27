@@ -45,11 +45,12 @@ class Game {
 	var boss : Boss;
 	
 	var win : Bool;
+	var bossHint : Int;
 	
 	public function new(e,pos) {
 		
 		var french = hxd.System.lang == "fr";
-		wavePos = pos;
+		wavePos = lastCheck = pos;
 		wavesData = [
 		
 			M(Slime,0),

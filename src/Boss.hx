@@ -26,6 +26,9 @@ class Boss extends Fighter {
 	override function update(dt) {
 		super.update(dt);
 		
+		if( x > game.hero.x + 400 )
+			x = game.hero.x + 400;
+		
 		if( pause < 0 && next != null ) {
 			var old = next;
 			next = null;

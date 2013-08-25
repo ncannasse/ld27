@@ -90,6 +90,7 @@ class Hero extends Fighter {
 		f.anim.loop = false;
 		f.anim.alpha = 0.8;
 		var time = 0., hit = 0.;
+		var chkBoss  = false;
 		game.todo.push(function(dt) {
 			this.push = 0;
 			time += dt;
@@ -103,8 +104,16 @@ class Hero extends Fighter {
 			while( hit > 5 ) {
 				hit -= 5;
 				for( f in game.fighters.copy() )
-					if( !f.skip && f.life > 0 && f.x < x + 400 && f.kind != Boss )
+					if( !f.skip && f.life > 0 && f.x < x + 400 ) {
+						if( f.kind == Boss ) {
+							if( chkBoss ) continue;
+							chkBoss = true;
+							if( ++game.bossHint == 2 && (game.prev == null || game.prev.parent == null) )
+								game.popText("Laser can't hurt robots\nFind weak point", 0x0080FF);
+							continue;
+						}
 						this.hit(f);
+					}
 			}
 			return true;
 		});
