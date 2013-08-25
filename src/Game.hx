@@ -123,7 +123,7 @@ class Game {
 			M(Fireball, 100, 3),
 			M(Wizard, 50),
 			Wait(50),
-			M(Slime, 50, 4),
+			M(Slime, 50, 3),
 			M(Crow, 50),
 			Wait(50),
 			M(Slime, 50, 4),

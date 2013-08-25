@@ -20,7 +20,7 @@ class Boss extends Fighter {
 		step = Appear;
 		act = -1;
 		soilY = mc.y;
-		life = maxLife = 320;
+		life = maxLife = 300;
 	}
 	
 	override function update(dt) {

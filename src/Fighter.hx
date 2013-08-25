@@ -109,7 +109,7 @@ class Fighter {
 		case Slime:
 			hxd.Resource.embed("gfx/slime.png");
 		case Goblin:
-			hxd.Resource.embed("gfx/monster.png");
+			hxd.Resource.embed("gfx/knight.png");
 		case Time:
 			anim.scale(0.7);
 			hxd.Resource.embed("gfx/clock.png");
