@@ -115,9 +115,6 @@ class Game {
 			M(Goblin, 50, 3),
 			M(Slime, 50, 5),
 			
-
-			Resume,
-			
 			M(Time, 50),
 			
 
