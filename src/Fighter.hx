@@ -35,6 +35,8 @@ class Fighter {
 	public var pause : Float;
 	public var push : Float;
 	
+	public var hitCount : Int;
+	
 	public var attackPower : Float;
 	public var life : Float;
 	public var maxLife : Float;
@@ -250,9 +252,14 @@ class Fighter {
 			bmp.remove();
 			return;
 		case Stone:
-			bmp.y -= 16*2;
+			bmp.y -= 16 * 2;
+			Sounds.play("break");
+		case Time:
+			
 		default:
+			//Sounds.play("fly");
 		}
+		
 		game.todo.push(function(dt) {
 			switch( kind ) {
 			case Stone:

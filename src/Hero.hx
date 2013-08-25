@@ -4,6 +4,8 @@ class Hero extends Fighter {
 
 	var wait : Float;
 	var next : Void -> Void;
+	var walkDist : Float = 0.;
+	var oldX = 0.;
 	
 	public var sliding : Bool;
 	public var slow : Float;
@@ -25,13 +27,18 @@ class Hero extends Fighter {
 		return Lambda.has(inventory, c);
 	}
 	
+	
 	override function update(dt:Float) {
+		
+		walk();
+		
 		super.update(dt);
+		
 		wait -= dt;
 		if( slow > 0 ) {
 			slow -= dt;
 			if( blocking )
-				moveSpeed *= Math.pow(0.95, dt);
+				moveSpeed *= Math.pow(0.93, dt);
 			if( slow <= 0 ) {
 				sliding = false;
 				blocking = false;
@@ -42,12 +49,15 @@ class Hero extends Fighter {
 		return true;
 	}
 	
-	public function cancelBlock() {
-		pause = 0;
-		slow = 0;
-		blocking = false;
-		moveSpeed = 4;
-		play();
+	public function walk() {
+		var dx = x - oldX;
+		if( dx > 0 && !sliding ) walkDist += dx;
+		oldX = x;
+		if( walkDist > 0 ) {
+			Sounds.play("walk");
+			if( walkDist > 50 ) walkDist = 50;
+			walkDist -= 50;
+		}
 	}
 	
 	public function block() {
@@ -57,11 +67,13 @@ class Hero extends Fighter {
 		pause = 30;
 		slow = 30;
 		blocking = true;
+		Sounds.play("block");
 	}
 
 	public function slide() {
 		if( pause > 0 )
 			return;
+		Sounds.play("slide");
 		play(hxd.Resource.embed("gfx/hero_slide.png"));
 		pause = 30;
 		slow = 30;
@@ -72,9 +84,12 @@ class Hero extends Fighter {
 	public function laser() {
 		if( pause > 0 )
 			return;
-		if( laserRecover )
+		if( laserRecover ) {
+			Sounds.play("laserOff");
 			return;
+		}
 		
+		Sounds.play("laser");
 		laserRecover = true;
 		
 		play(hxd.Resource.embed("gfx/hero_lock.png"));
@@ -90,7 +105,7 @@ class Hero extends Fighter {
 		f.anim.loop = false;
 		f.anim.alpha = 0.8;
 		var time = 0., hit = 0.;
-		var chkBoss  = false;
+		var chkBoss = false;
 		game.todo.push(function(dt) {
 			this.push = 0;
 			time += dt;
@@ -103,17 +118,18 @@ class Hero extends Fighter {
 			hit += dt;
 			while( hit > 5 ) {
 				hit -= 5;
-				for( f in game.fighters.copy() )
+				for( f in game.fighters.copy() ) {
+					if( f.kind == Boss ) {
+						if( chkBoss ) continue;
+						chkBoss = true;
+						if( ++game.bossHint == 2 && (game.prev == null || game.prev.parent == null) )
+							game.popText("Laser can't hurt robots\nFind weak point", 0x0080FF);
+						continue;
+					}
 					if( !f.skip && f.life > 0 && f.x < x + 400 ) {
-						if( f.kind == Boss ) {
-							if( chkBoss ) continue;
-							chkBoss = true;
-							if( ++game.bossHint == 2 && (game.prev == null || game.prev.parent == null) )
-								game.popText("Laser can't hurt robots\nFind weak point", 0x0080FF);
-							continue;
-						}
 						this.hit(f);
 					}
+				}
 			}
 			return true;
 		});
@@ -136,6 +152,26 @@ class Hero extends Fighter {
 	}
 	
 	function hit( m : Fighter ) {
+		
+		switch( m.kind ) {
+		case Slime, Wizard:
+			Sounds.play("hit");
+		case Goblin:
+			Sounds.play("hit2");
+		case Crow:
+			Sounds.play("hit5");
+		case Stone:
+			Sounds.play("hit3");
+		case Chain:
+			Sounds.play("hit4");
+		case Time, Missile, LaserAnim, Hero, Fireball, FChest(_):
+			Sounds.play("hit3");//?
+		case Boss:
+			Sounds.play("hit4");
+			if( m.hitCount++ == 5 )
+				m.skip = true;
+		}
+		
 		switch( m.kind ) {
 		case Stone:
 			for( i in 0...4 ) {
@@ -168,7 +204,6 @@ class Hero extends Fighter {
 			for( i in 0...4 )
 				game.expl.add(new Part.Boom(game.expl.tile, m.x + ex + 10, m.mc.y - 10));
 		}
-		
 		
 		var pv = Std.int((Math.random() * 0.5 + 1) * attackPower);
 		m.life -= pv;

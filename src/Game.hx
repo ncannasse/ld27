@@ -2,7 +2,7 @@ typedef K = hxd.Key;
 
 enum Wave {
 	Resume;
-	Tuto( t : String, ?cond : Void -> Bool );
+	Tuto( t : String, ?cond : Void -> Bool, ?sfx : String );
 	M( m : Fighter.FKind, dist : Int, ?count : Int );
 	Wait( dist : Int );
 	Chest( k : Fighter.CKind, text : String );
@@ -108,19 +108,34 @@ class Game {
 			M(Goblin, 10, 10),
 			Wait(200),
 			M(Goblin, 200),
-			
+
 			M(Time, 200),
 			M(Chain, 200, 4),
 			Wait(70),
 			M(Goblin, 50, 3),
 			M(Slime, 50, 5),
 			
+
+			Resume,
 			
 			M(Time, 50),
+			
+
+			Wait(100),
+			M(Goblin, 50, 3),
+			M(Fireball, 100, 3),
+			M(Wizard, 50),
+			Wait(50),
+			M(Slime, 50, 4),
+			M(Crow, 50),
+			Wait(50),
+			M(Slime, 50, 4),
+			M(Time, 100),
 						
 
 			Wait(800),
-			Tuto("Warning ! Danger Approaching !"),
+			
+			Tuto("Warning ! Danger Approaching !", null, "warning"),
 			Wait(50),
 
 			M(Boss, 100),
@@ -241,18 +256,23 @@ class Game {
 				if( hero.laserRecover ) { hero.laserRecover = false; las = true; };
 				popText("Time UP!"+(las?"\nLaser ready":""), 0xE1E6FF);
 				nextTime = haxe.Timer.stamp() + 10;
+				Sounds.play("time");
 				first.kill();
 				if( boss == null ) lastCheck = wavePos - 1;
 			case FChest(kind,text):
 				popText(text, 0xE1E6FF);
 				first.kill();
 				hero.inventory.push(kind);
+				Sounds.play("item");
 			case Fireball:
 				if( first.x <= hero.x + 10 ) {
-					if( !hero.blocking )
+					if( !hero.blocking ) {
+						Sounds.play("fire");
 						hero.push -= 200;
-					else
+					} else {
+						Sounds.play("fire2");
 						hero.slow *= 0.5;
+					}
 					first.remove();
 					for( i in 0...10 ) {
 						var p = new Part(fire.tile, first.x + 20, first.mc.y);
@@ -263,10 +283,13 @@ class Game {
 				}
 			case Missile:
 				if( first.x <= hero.x + 10 ) {
-					if( !hero.blocking )
+					if( !hero.blocking ) {
+						Sounds.play("fire");
 						hero.push -= 100;
-					else
+					} else {
+						Sounds.play("fire2");
 						hero.slow *= 0.3;
+					}
 					first.remove();
 					for( i in 0...20 ) {
 						var p = new Part(fire.tile, first.x + 20, first.mc.y);
@@ -287,6 +310,7 @@ class Game {
 				hero.x = first.x - 20;
 			case Chain:
 				hero.push -= 50;
+				Sounds.play("hit4");
 			case Boss if( boss.step == Evade ):
 				// no recal
 			default:
@@ -325,8 +349,9 @@ class Game {
 		switch( wavesData[wavePos] ) {
 		case Resume:
 			wavePos++;
-		case Tuto(text, cond):
+		case Tuto(text, cond, sfx):
 			popText(text, 0xFFFFFF, cond);
+			if( sfx != null ) Sounds.play(sfx);
 			wavePos++;
 		case M(kind, dist, count):
 			if( ( -tx) - waveDist >= dist ) {
@@ -393,18 +418,24 @@ class Game {
 			hero.anim.currentFrame = 1;
 			var wait = 0.;
 			if( win ) {
-				popText("Victory !!", 0x00FF00, function() {
+				var v = new h2d.Bitmap(hxd.Resource.embed("gfx/victory.png").toTile(), scene);
+				v.x = -v.tile.width;
+				v.alpha = 0.8;
+				v.y = 40;
+				v.colorKey = 0xFFFFFF;
+				todo.push(function(dt) {
 					wait += Timer.deltaT;
+					if( v.x < -40 ) v.x += dt * 5 - v.x * 0.05;
 					nextTime = haxe.Timer.stamp() + wait;
 					if( wait > 10 ) {
 						dispose();
 						showTitle();
-						return true;
+						return false;
 					}
-					return false;
+					return true;
 				});
 			} else {
-				popText("Keep Trying", 0xFF0000, function() {
+				popText("Time over\nKeep Trying", 0xFF0000, function() {
 					wait += Timer.deltaT * 4;
 					nextTime = haxe.Timer.stamp() + wait;
 					if( wait > 10 ) {

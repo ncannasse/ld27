@@ -20,7 +20,7 @@ class Boss extends Fighter {
 		step = Appear;
 		act = -1;
 		soilY = mc.y;
-		life = maxLife = 450;
+		life = maxLife = 400;
 	}
 	
 	override function update(dt) {
@@ -45,6 +45,7 @@ class Boss extends Fighter {
 			switch( act++ ) {
 			case 0,2,4:
 				step = Jump;
+				Sounds.play("bossJump");
 				jump = -10;
 				moveSpeed = 1;
 				skip = true;
@@ -60,6 +61,8 @@ class Boss extends Fighter {
 					for( i in 0...4 )
 						new Fighter(Crow).x = x + i * 30;
 				case 3,1:
+					
+					Sounds.play("missiles");
 					
 					var m0 = new Fighter(Missile);
 					m0.x = x + 100;
@@ -85,6 +88,8 @@ class Boss extends Fighter {
 			if( mc.y > soilY ) {
 				mc.y = soilY;
 				jump *= -0.5;
+			
+				Sounds.play("bossLand");
 				
 				var m = game.hero;
 				if( Math.abs(x - m.x) < 30 ) {
@@ -92,6 +97,7 @@ class Boss extends Fighter {
 						var p = new Part(game.expl.tile, m.x, m.mc.y);
 						game.expl.add(p);
 					}
+					Sounds.play("fire2");
 					m.push -= 250;
 					act--; // rejump
 				}
@@ -99,6 +105,7 @@ class Boss extends Fighter {
 				if( Math.abs(jump) < 3 ) {
 					step = Evade;
 					skip = false;
+					hitCount = 0;
 				}
 			}
 		case Evade:
@@ -125,7 +132,7 @@ class Boss extends Fighter {
 		game.hero.play();
 		game.nextTime = haxe.Timer.stamp() + 7;
 		var stopped = false;
-		var smokeTime = 0.;
+		var smokeTime = 0., sfx = 0;
 		game.todo.push(function(dt) {
 			game.hero.pause = 1e10;
 			game.hero.slow = 1e10;
@@ -158,8 +165,17 @@ class Boss extends Fighter {
 					p.dy = (Math.random() - 0.7) * 5;
 					game.smoke.add(p);
 				}
+				if( Std.random(20 - sfx) == 0 ) {
+					sfx = 0;
+					Sounds.play("explode");
+				} else
+					sfx++;
 				smokeTime += dt;
 				if( smokeTime > 200 ) {
+					Sounds.play("fire");
+					haxe.Timer.delay(function() Sounds.play("fire"), 100);
+					haxe.Timer.delay(function() Sounds.play("fire"), 200);
+					haxe.Timer.delay(function() Sounds.play("fire"), 350);
 					for( i in 0...1000 ) {
 						var px = x + Math.random() * 40, py = mc.y - Math.random() * 40;
 						var p = new Part(game.expl.tile, px, py);
