@@ -2,6 +2,7 @@
 enum CKind {
 	Shield;
 	Slide;
+	Laser;
 }
 
 enum FKind {
@@ -9,12 +10,12 @@ enum FKind {
 	Slime;
 	Goblin;
 	Time;
-	Magic;
 	FChest( c : CKind, text : String );
 	Fireball;
 	Wizard;
 	Stone;
 	Crow;
+	LaserAnim;
 }
 
 class Fighter {
@@ -66,11 +67,6 @@ class Fighter {
 		case Time:
 			life = 0;
 			moveSpeed = 0;
-		case Magic:
-			life = 0;
-			moveSpeed = 0;
-			center = true;
-			anim.y -= 16;
 		case Wizard:
 			moveSpeed = 0;
 		case Fireball:
@@ -86,7 +82,7 @@ class Fighter {
 		case Crow:
 			moveSpeed = 1.5;
 			life = 40;
-		case FChest(k, _):
+		case FChest(_), LaserAnim:
 			moveSpeed = 0;
 			life = 0;
 		}
@@ -98,15 +94,18 @@ class Fighter {
 		case Goblin:
 			hxd.Resource.embed("gfx/monster.png");
 		case Time:
-			hxd.Resource.embed("gfx/hourglass.png");
-		case Magic:
-			null;// hxd.Resource.embed("gfx/timeBonus.png");
+			anim.scale(0.7);
+			hxd.Resource.embed("gfx/clock.png");
+		case LaserAnim:
+			hxd.Resource.embed("gfx/laserAnim.png");
 		case FChest(k,_):
 			switch(k) {
 			case Shield:
 				hxd.Resource.embed("gfx/shield.png");
 			case Slide:
 				hxd.Resource.embed("gfx/timeBonus.png");
+			case Laser:
+				hxd.Resource.embed("gfx/laser.png");
 			}
 		case Fireball:
 			hxd.Resource.embed("gfx/fireBall.png");
@@ -126,7 +125,8 @@ class Fighter {
 		if( res == null ) res = defaultRes;
 		var t = res.toTile();
 		var cy = center ? size >> 1 : size;
-		anim.play([for( a in t.split(Std.int(t.height/size), true) ) a.center(t.width>>1, cy)]);
+		var cx = switch( kind ) { case LaserAnim: 0; default: t.width >> 1; };
+		anim.play([for( a in t.split(Std.int(t.height/size), true) ) a.center(cx, cy)]);
 	}
 	
 	public function get_x() {
@@ -150,8 +150,6 @@ class Fighter {
 		pause -= dt;
 		x += moveSpeed * dt * anim.scaleX;
 		switch( kind ) {
-		case Magic:
-			anim.rotation += 0.1 * dt;
 		case Stone:
 			anim.currentFrame = 4 * (1 - life / maxLife);
 		default:
@@ -176,8 +174,6 @@ class Fighter {
 		bmp.colorKey = anim.colorKey;
 		bmp.rotation = anim.rotation;
 		switch( kind ) {
-		case Magic:
-			bmp.y += 16;
 		case FChest(_):
 			bmp.remove();
 			return;
@@ -187,12 +183,6 @@ class Fighter {
 		}
 		game.todo.push(function(dt) {
 			switch( kind ) {
-			case Magic:
-				bmp.scale(1.02 * dt);
-				bmp.rotation += 0.1 * dt;
-				bmp.alpha -= 0.02 * dt;
-				if( bmp.alpha < 0 )
-					return false;
 			case Stone:
 				bmp.alpha -= 0.05 * dt;
 				if( bmp.alpha < 0 )

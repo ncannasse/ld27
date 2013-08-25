@@ -19,7 +19,9 @@ class Background {
 		var sbg = [
 			{ r : hxd.Resource.embed("gfx/bg1.png"), n : 18 },
 			{ r : hxd.Resource.embed("gfx/bg1atrans.png"), n : 1 },
-			{ r : hxd.Resource.embed("gfx/bg1a.png"), n : 18 },
+			{ r : hxd.Resource.embed("gfx/bg1a.png"), n : 22 },
+			{ r : hxd.Resource.embed("gfx/bg1btrans.png"), n : 1 },
+			{ r : hxd.Resource.embed("gfx/bg1b.png"), n : 22 },
 		];
 		var px = 0;
 		for( k in sbg ) {
@@ -38,7 +40,9 @@ class Background {
 		var sbg = [
 			{ r : hxd.Resource.embed("gfx/bg.png"), n : 9 },
 			{ r : hxd.Resource.embed("gfx/bgatrans.png"), n : 1 },
-			{ r : hxd.Resource.embed("gfx/bga.png"), n : 9 },
+			{ r : hxd.Resource.embed("gfx/bga.png"), n : 11 },
+			{ r : hxd.Resource.embed("gfx/bgbtrans.png"), n : 1 },
+			{ r : hxd.Resource.embed("gfx/bgb.png"), n : 11 },
 		];
 		var px = 0;
 		for( k in sbg ) {

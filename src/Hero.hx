@@ -9,6 +9,7 @@ class Hero extends Fighter {
 	public var slow : Float;
 	public var blocking : Bool;
 	public var inventory : Array<Fighter.CKind>;
+	public var laserRecover : Bool;
 	
 	public function new() {
 		super(Hero);
@@ -67,6 +68,46 @@ class Hero extends Fighter {
 		moveSpeed = 3;
 	}
 	
+	public function laser() {
+		if( pause > 0 )
+			return;
+		if( laserRecover )
+			return;
+		
+		laserRecover = true;
+		
+		play(hxd.Resource.embed("gfx/hero_lock.png"));
+		pause = 100;
+		slow = 100;
+		moveSpeed = 0;
+
+		var f = new Fighter(LaserAnim);
+		f.skip = true;
+		f.x = x + 8;
+		f.anim.scaleX = 0;
+		f.anim.speed = 12;
+		f.anim.loop = false;
+		f.anim.alpha = 0.8;
+		var time = 0., hit = 0.;
+		game.todo.push(function(dt) {
+			time += dt;
+			var w = time > 40 ? -0.5 : 0.5;
+			f.anim.scaleX += dt * w;
+			if( f.anim.scaleX <= 0 ) {
+				f.remove();
+				return false;
+			}
+			hit += dt;
+			if( hit > 0.5 ) {
+				hit -= 0.5;
+				for( f in game.fighters.copy() )
+					if( !f.skip )
+						this.hit(f);
+			}
+			return true;
+		});
+	}
+	
 	public function action( m : Fighter ) {
 		if( pause > 0 )
 			return;
@@ -78,7 +119,12 @@ class Hero extends Fighter {
 			play(hxd.Resource.embed("gfx/hero_lock.png"));
 			return;
 		}
-			
+		
+		hit(m);
+		pause = 3;
+	}
+	
+	function hit( m : Fighter ) {
 		switch( m.kind ) {
 		case Stone:
 			for( i in 0...4 ) {
@@ -108,8 +154,6 @@ class Hero extends Fighter {
 		m.pop("-" + pv, 0xFE9FA1).rotation = -(Math.random() + 0.5) * 0.5;
 		if( m.life <= 0 )
 			m.kill();
-			
-		pause = 3;
 	}
 	
 }

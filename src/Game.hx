@@ -27,6 +27,7 @@ class Game {
 	var world : h2d.Sprite;
 	var bg : Background;
 	var font : h2d.Font;
+	var lastCheck : Int;
 	
 	var todo : Array < Float -> Bool >;
 	var wavePos : Int;
@@ -38,10 +39,12 @@ class Game {
 	
 	var isGameOver : Bool;
 	var allTexts : Array<flash.text.TextField>;
+	var prev : flash.text.TextField;
 	
-	public function new(e) {
+	public function new(e,pos) {
 		
 		var french = hxd.System.lang == "fr";
+		wavePos = pos;
 		wavesData = [
 		
 			M(Slime,0),
@@ -65,7 +68,7 @@ class Game {
 			M(Stone, 300),
 			Wait(300),
 			M(Goblin, 150, 2),
-			
+
 			M(Time, 300),
 			Wait(500),
 			Chest(Shield, "Use E to protect yourself"),
@@ -81,7 +84,6 @@ class Game {
 			M(Fireball, 150, 3),
 			M(Wizard, 50),
 			
-			
 			M(Time, 200),
 			Wait(100),
 			M(Crow, 40, 3),
@@ -90,10 +92,16 @@ class Game {
 			M(Fireball,100, 3),
 			M(Wizard, 50),
 			
-			
 			M(Time, 100),
 			Wait(500),
-			//Chest(
+			Chest(Laser, "Use R to fire laser beam"),
+			Wait(300),
+			M(Goblin, 10, 10),
+			Wait(200),
+			M(Goblin, 200),
+			M(Time, 200),
+			
+			Resume,
 			
 			End,
 		];
@@ -122,17 +130,22 @@ class Game {
 
 
 		
-		for( i in 0...wavesData.length )
-			if( wavesData[i] == Resume ) {
-				for( j in 0...i )
-					switch( wavesData[j] ) {
-					case Chest(c,_):
-						hero.inventory.push(c);
-					default:
-					}
-				wavesData.splice(0, i);
-				break;
+		if( wavePos == 0 )
+			for( i in 0...wavesData.length )
+				if( wavesData[i] == Resume ) {
+					wavePos = i;
+					break;
+				}
+			
+		for( i in 0...wavePos )
+			switch( wavesData[i] ) {
+			case Wait(d): waveDist += d;
+			case M(_, d, c): if( c == null ) c = 1; waveDist += d * c;
+			case Chest(c, _): hero.inventory.push(c);
+			case Resume, Tuto(_), End:
 			}
+		hero.x = waveDist;
+		world.x = -waveDist;
 		
 		var rexpl = hxd.Resource.embed("gfx/explode.png");
 		
@@ -193,9 +206,12 @@ class Game {
 		if( first != null && hero.x > first.x - 20 ) {
 			switch( first.kind ) {
 			case Time:
-				popText("Time UP!", 0xE1E6FF);
+				var las = false;
+				if( hero.laserRecover ) { hero.laserRecover = false; las = true; };
+				popText("Time UP!"+(las?"\nLaser ready":""), 0xE1E6FF);
 				nextTime = haxe.Timer.stamp() + 10;
 				first.kill();
+				lastCheck = wavePos - 1;
 			case FChest(kind,text):
 				popText(text, 0xE1E6FF);
 				first.kill();
@@ -232,11 +248,13 @@ class Game {
 			hero.slide();
 		if( Key.isToggled("E".code) && hero.has(Shield) )
 			hero.block();
+		if( Key.isToggled("R".code) && hero.has(Laser) )
+			hero.laser();
 			
 		if( Key.isToggled(27) ) {
 			haxe.Timer.delay(function() {
 				dispose();
-				inst = new Game(engine);
+				inst = new Game(engine, 0);
 				inst.init();
 			},0);
 			return;
@@ -292,13 +310,11 @@ class Game {
 		engine.render(scene);
 	}
 	
-	function cleanTexts(keepTime=false) {
+	function cleanTexts() {
 		for( t in allTexts )
-			if( t.parent != null ) {
-				if( keepTime && t == remTime ) continue;
+			if( t.parent != null )
 				t.parent.removeChild(t);
-			}
-		allTexts = keepTime ? [remTime] : [];
+		allTexts = [];
 	}
 	
 	function dispose() {
@@ -316,14 +332,12 @@ class Game {
 			hero.anim.speed = 0;
 			hero.anim.currentFrame = 1;
 			var wait = 0.;
-			var t = null;
-			cleanTexts(true);
-			t = popText("Game Over", 0xFF0000, function() {
+			popText("Game Over", 0xFF0000, function() {
 				wait += Timer.deltaT * 4;
 				nextTime = haxe.Timer.stamp() + wait;
 				if( wait > 10 ) {
 					dispose();
-					inst = new Game(engine);
+					inst = new Game(engine, lastCheck);
 					inst.init();
 					return true;
 				}
@@ -333,11 +347,16 @@ class Game {
 	}
 	
 	function popText( text : String, color : Int, ?cond ) {
+		if( prev != null && prev.parent != null ) {
+			prev.parent.removeChild(prev);
+			prev = null;
+		}
 		var t = newText();
 		t.textColor = color;
 		t.text = text;
 		t.x = (t.stage.stageWidth - t.textWidth) * 0.5;
 		t.y = 330;
+		prev = t;
 		if( cond == null )
 			t.alpha = 2;
 		todo.push(function(dt) {
@@ -346,7 +365,7 @@ class Game {
 			if( cond == null ) {
 				t.alpha -= 0.02 * dt;
 				if( t.alpha <= 0 ) {
-					t.parent.removeChild(t);
+					if( t.parent != null ) t.parent.removeChild(t);
 					return false;
 				}
 			}
@@ -361,7 +380,7 @@ class Game {
 		var engine = new h3d.Engine();
 		engine.backgroundColor = 0xFF808080;
 		engine.onReady = function() {
-			inst = new Game(engine);
+			inst = new Game(engine, 0);
 			inst.init();
 			hxd.System.setLoop(function() inst.update());
 			Key.init();
