@@ -20,7 +20,7 @@ class Boss extends Fighter {
 		step = Appear;
 		act = -1;
 		soilY = mc.y;
-		life = maxLife = 400;
+		life = maxLife = 320;
 	}
 	
 	override function update(dt) {
@@ -42,24 +42,24 @@ class Boss extends Fighter {
 				step = WaitForAction;
 			}
 		case Action:
-			switch( act++ ) {
-			case 0,2,4:
+			switch( Std.random(3) ) {
+			case 0,1:
 				step = Jump;
 				Sounds.play("bossJump");
 				jump = -10;
 				moveSpeed = 1;
 				skip = true;
-			case 1,3, 5:
-				new Fighter(Time).x = x;
-			case 6:
+			case 2:
 				switch( Std.random(4) )
 				{
-				case 0:
+				case 0 if( !game.hero.laserRecover ):
+					Sounds.play("warning");
 					for( i in 0...10 )
-						new Fighter(Goblin).x = x + i * 30;
+						new Fighter(Goblin).x = game.hero.x + 350 + i * 30;
 				case 2:
+					Sounds.play("hit5");
 					for( i in 0...4 )
-						new Fighter(Crow).x = x + i * 30;
+						new Fighter(Crow).x = game.hero.x + 350 + i * 30;
 				case 3,1:
 					
 					Sounds.play("missiles");

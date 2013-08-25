@@ -138,6 +138,7 @@ class Game {
 			M(Boss, 100),
 			M(Time, 500),
 		
+			M(Time, 1800),
 			End,
 		];
 		
@@ -374,6 +375,7 @@ class Game {
 			f.x = waveDist + 300;
 			wavePos++;
 		case End:
+			wavePos--;
 		}
 		
 		for( t in todo.copy() )
