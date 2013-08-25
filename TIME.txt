@@ -28,4 +28,5 @@ Day2:
 11:30-12:00 chain
 12:00-13:30 boss main animation and fxs
 13:30-14:30 boss IA started, ensure infinite BG
-14:30-17:15 boss fight and victory done
+14:30-17:50 boss fight and victory done
+17:50-18:45 title screen
