@@ -24,4 +24,6 @@ Day2:
 
 09:00 Start
 09:00-10:00 Laser
-10:00-11:10 backgrounds HSL + lava bg
+10:00-11:30 backgrounds HSL + lava bg + 3rd parallax
+11:30-12:00 chain
+12:00-13:30 boss main animation and fxs

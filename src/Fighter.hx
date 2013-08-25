@@ -16,13 +16,16 @@ enum FKind {
 	Stone;
 	Crow;
 	LaserAnim;
+	Chain;
+	Boss;
 }
 
 class Fighter {
 
 	var game : Game;
-	public var skip : Bool;
 	public var anim : h2d.Anim;
+	public var mc : h2d.Sprite;
+	public var skip : Bool;
 	public var kind : FKind;
 	public var moveSpeed : Float;
 	public var pushPower : Float;
@@ -40,11 +43,14 @@ class Fighter {
 	public function new(k) {
 		this.kind = k;
 		game = Game.inst;
-		anim = new h2d.Anim(game.fightCont);
+		
+		mc = new h2d.Sprite(game.fightCont);
+		mc.y = Game.BASEY;
+		
+		anim = new h2d.Anim(mc);
 		anim.colorKey = 0x5E016D;
 		anim.speed = 20 + Math.random() - 0.5;
 		anim.currentFrame = Math.random() * 8;
-		anim.y = Game.BASEY;
 		anim.scaleX = -1;
 		push = 0;
 		pause = 0;
@@ -55,7 +61,7 @@ class Fighter {
 		moveSpeed = 1;
 		life = 10;
 		var size = 32;
-		var center = false;
+		var center = 1;
 		switch( kind ) {
 		case Hero:
 			moveSpeed = 4;
@@ -74,7 +80,7 @@ class Fighter {
 			moveSpeed = 2;
 		case Stone:
 			size = 64;
-			anim.y += 4;
+			mc.y += 4;
 			anim.speed = 0;
 			life = 200;
 			moveSpeed = 0;
@@ -85,6 +91,12 @@ class Fighter {
 		case FChest(_), LaserAnim:
 			moveSpeed = 0;
 			life = 0;
+		case Chain:
+			life = 200;
+			moveSpeed = 0;
+		case Boss:
+			life = 2000;
+			moveSpeed = 3.5;
 		}
 		var res = switch( kind ) {
 		case Hero:
@@ -98,6 +110,12 @@ class Fighter {
 			hxd.Resource.embed("gfx/clock.png");
 		case LaserAnim:
 			hxd.Resource.embed("gfx/laserAnim.png");
+		case Chain:
+			size = 120;
+			center = 0;
+			mc.y -= 132;
+			pushPower = 5;
+			hxd.Resource.embed("gfx/chain.png");
 		case FChest(k,_):
 			switch(k) {
 			case Shield:
@@ -115,25 +133,70 @@ class Fighter {
 			hxd.Resource.embed("gfx/stone.png");
 		case Crow:
 			hxd.Resource.embed("gfx/crow.png");
+		case Boss:
+			
+			mc.scale(1.5);
+			anim.x += 10;
+			
+			anim.scaleX = 1;
+			mc.y += 8;
+			size = 94;
+			anim.colorKey = 0xFFFFFF;
+	
+			var fire = [];
+			for( i in 0...10 ) {
+				var r = new h2d.Anim(mc);
+				r.speed = 20;
+				r.play([for( t in hxd.Resource.embed("gfx/reactor.png").toTile().split(5, true) ) t.center(0,16)]);
+				r.blendMode = Add;
+				r.alpha = 0.2;
+				var m = new h3d.Matrix();
+				m.identity();
+				m._12 = i / 5;
+				//r.colorMatrix = m;
+				r.y = -84 + 16;
+				r.x = 28;
+				fire.push(r);
+			}
+			
+			var h = new h2d.Bitmap(hxd.Resource.embed("gfx/redHalo.png").toTile(), mc);
+			h.y = -22;
+			h.x = 25;
+			h.colorKey = 0x5E016D;
+			h.scale(0.3);
+			var time = 0.;
+			game.todo.push(function(dt) {
+				time += dt;
+				h.alpha = Math.sin(time * 0.1) * 0.2 + 0.2;
+				
+				for( i in 0...fire.length ) {
+					var a = i * Math.PI * 2 / fire.length;
+					fire[i].scaleY = Math.sin(time * 0.1 + a) * 0.8;
+					fire[i].scaleX = 0.8 + Math.cos(time * 0.05 + a) * 0.2;
+				}
+				return true;
+			});
+			
+			hxd.Resource.embed("gfx/boss.png");
 		};
 		maxLife = life;
 		defaultRes = res;
 		play(res, size, center);
 	}
 	
-	public function play(?res:hxd.Resource.BitmapRes, size = 32, center = false) {
+	public function play(?res:hxd.Resource.BitmapRes, size = 32, center = 1) {
 		if( res == null ) res = defaultRes;
 		var t = res.toTile();
-		var cy = center ? size >> 1 : size;
+		var cy = size * center;
 		var cx = switch( kind ) { case LaserAnim: 0; default: t.width >> 1; };
 		anim.play([for( a in t.split(Std.int(t.height/size), true) ) a.center(cx, cy)]);
 	}
 	
 	public function get_x() {
-		return anim.x;
+		return mc.x;
 	}
 	public function set_x(v) {
-		return anim.x = v;
+		return mc.x = v;
 	}
 	
 	public function update(dt:Float) {
@@ -152,6 +215,8 @@ class Fighter {
 		switch( kind ) {
 		case Stone:
 			anim.currentFrame = 4 * (1 - life / maxLife);
+		case Chain:
+			anim.rotation = Math.sin(pause * 0.05) * 0.1;
 		default:
 		}
 		return true;
@@ -168,8 +233,8 @@ class Fighter {
 		remove();
 		var frame = anim.getFrame();
 		var bmp = new h2d.Bitmap(frame == null ? null : frame.center(16,16), game.fightCont);
-		bmp.x = anim.x;
-		bmp.y = anim.y - 16;
+		bmp.x = mc.x;
+		bmp.y = mc.y - 16;
 		bmp.scaleX = anim.scaleX;
 		bmp.colorKey = anim.colorKey;
 		bmp.rotation = anim.rotation;
@@ -218,7 +283,7 @@ class Fighter {
 		t.y = -t.textHeight * 0.5;
 		
 		spr.x = x - anim.scaleX * 16;
-		spr.y = anim.y - 16;
+		spr.y = mc.y - 16;
 		
 		t.alpha = 2;
 		

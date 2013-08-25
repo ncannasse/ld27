@@ -91,7 +91,7 @@ class Game {
 			Wait(150),
 			M(Fireball,100, 3),
 			M(Wizard, 50),
-			
+
 			M(Time, 100),
 			Wait(500),
 			Chest(Laser, "Use R to fire laser beam"),
@@ -99,10 +99,18 @@ class Game {
 			M(Goblin, 10, 10),
 			Wait(200),
 			M(Goblin, 200),
-			M(Time, 200),
 			
+			
+			
+			M(Time, 200),
+
+			M(Chain, 200, 10),
+
 			Resume,
 			
+			M(Boss,100),
+			
+		
 			End,
 		];
 		
@@ -224,16 +232,18 @@ class Game {
 						hero.slow *= 0.5;
 					first.remove();
 					for( i in 0...10 ) {
-						var p = new Part(fire.tile, first.x + 20, first.anim.y);
+						var p = new Part(fire.tile, first.x + 20, first.mc.y);
 						p.gravity *= 0.7;
 						p.dy *= 0.8;
 						fire.add(p);
 					}
 				}
-			case Crow if( hero.sliding ):
+			case Crow, Chain if( hero.sliding ):
 				first.skip = true;
 			case Stone:
 				hero.x = first.x - 20;
+			case Chain:
+				hero.push -= 50;
 			default:
 				var tpower = (hero.pushPower + first.pushPower);
 				var h = (hero.x * first.pushPower + first.x * hero.pushPower) / tpower;

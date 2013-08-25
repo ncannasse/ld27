@@ -15,7 +15,7 @@ class Hero extends Fighter {
 		super(Hero);
 		skip = true;
 		inventory = [];
-		anim.x = -16;
+		mc.x = -16;
 		anim.scaleX = 1;
 		pause = 0;
 		slow = 0;
