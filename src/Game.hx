@@ -9,6 +9,9 @@ enum Wave {
 	End;
 }
 
+@:sound("music.mp3") class Music extends flash.media.Sound {
+}
+
 @:publicFields
 class Game {
 	
@@ -169,25 +172,27 @@ class Game {
 		
 		var rexpl = hxd.Resource.embed("gfx/explode.png");
 		
-		expl = new h2d.SpriteBatch(rexpl.toTile().center(16,16), world);
+		var parts = world;
+		
+		expl = new h2d.SpriteBatch(rexpl.toTile().center(16,16), parts);
 		expl.hasRotationScale = true;
 		expl.hasUpdate = true;
 		expl.blendMode = Add;
 		expl.color = new h3d.Vector(1, 0.6, 0., 1);
 		
 
-		stones = new h2d.SpriteBatch(hxd.Resource.embed("gfx/smallStone.png").toTile().center(8, 8), world);
+		stones = new h2d.SpriteBatch(hxd.Resource.embed("gfx/smallStone.png").toTile().center(8, 8), parts);
 		stones.colorKey = 0x5E016D;
 		stones.hasRotationScale = true;
 		stones.hasUpdate = true;
 
-		fire = new h2d.SpriteBatch(rexpl.toTile().center(16,16), world);
+		fire = new h2d.SpriteBatch(rexpl.toTile().center(16,16), parts);
 		fire.hasRotationScale = true;
 		fire.hasUpdate = true;
 		fire.blendMode = Add;
 		fire.color = new h3d.Vector(1, 0., 0., 1);
 
-		smoke = new h2d.SpriteBatch(hxd.Resource.embed("gfx/smoke.png").toTile().center(16,16), world);
+		smoke = new h2d.SpriteBatch(hxd.Resource.embed("gfx/smoke.png").toTile().center(16,16), parts);
 		smoke.colorKey = 0x5E016D;
 		smoke.hasRotationScale = true;
 		smoke.hasUpdate = true;
@@ -399,7 +404,7 @@ class Game {
 					return false;
 				});
 			} else {
-				popText("Game Over", 0xFF0000, function() {
+				popText("Keep Trying", 0xFF0000, function() {
 					wait += Timer.deltaT * 4;
 					nextTime = haxe.Timer.stamp() + wait;
 					if( wait > 10 ) {
@@ -466,6 +471,7 @@ class Game {
 	}
 	
 	public static function main() {
+		new Music().play(0, 100000);
 		_ENGINE = new h3d.Engine();
 		_ENGINE.backgroundColor = 0xFF808080;
 		_ENGINE.onReady = function() {
