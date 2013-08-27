@@ -92,7 +92,7 @@ class Hero extends Fighter {
 		Sounds.play("laser");
 		laserRecover = true;
 		
-		play(hxd.Resource.embed("gfx/hero_lock.png"));
+		play(lock);
 		pause = 100;
 		slow = 100;
 		moveSpeed = 0;
@@ -135,6 +135,8 @@ class Hero extends Fighter {
 		});
 	}
 	
+	static var lock = hxd.Resource.embed("gfx/hero_lock.png");
+	
 	public function action( m : Fighter ) {
 		if( pause > 0 )
 			return;
@@ -143,7 +145,7 @@ class Hero extends Fighter {
 			pause = 20;
 			slow = 10.;
 			moveSpeed = 0;
-			play(hxd.Resource.embed("gfx/hero_lock.png"));
+			play(lock);
 			return;
 		}
 		

@@ -45,14 +45,15 @@ class Background {
 
 		
 		// MOUNTAINS
+		var bgb = hxd.Resource.embed("gfx/bgb.png");
 		var sbg = [
 			{ r : hxd.Resource.embed("gfx/bg.png"), n : 9, p : 6 },
 			{ r : hxd.Resource.embed("gfx/bgatrans.png"), n : 1, p : 1 },
 			{ r : hxd.Resource.embed("gfx/bga.png"), n : 11, p : 7 },
 			{ r : hxd.Resource.embed("gfx/bgbtrans.png"), n : 1, p : 1},
-			{ r : hxd.Resource.embed("gfx/bgb.png"), n : 11, p : 3 },
+			{ r : bgb, n : 11, p : 3 },
 			{ r : hxd.Resource.embed("gfx/bgbend.png"), n : 0, p : 1 },
-			{ r : hxd.Resource.embed("gfx/bgb.png"), n : 4, p : 0 },
+			{ r : bgb, n : 4, p : 0 },
 		];
 		var px = 0;
 		for( k in sbg ) {

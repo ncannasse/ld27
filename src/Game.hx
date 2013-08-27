@@ -502,7 +502,7 @@ class Game {
 	
 	public static function main() {
 		new Music().play(0, 100000);
-		_ENGINE = new h3d.Engine();
+		_ENGINE = new h3d.Engine(false);
 		_ENGINE.backgroundColor = 0xFF808080;
 		_ENGINE.onReady = function() {
 			showTitle();
