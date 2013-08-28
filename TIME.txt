@@ -20,7 +20,7 @@ Day1: 12.5 hours
 22:20-23:20 second bg + adjusted waves
 23:20-00:55 gradient backgrounds
 
-Day2:
+Day2: 14 hours
 
 09:00 Start
 09:00-10:00 Laser
@@ -28,10 +28,17 @@ Day2:
 11:30-12:00 chain
 12:00-13:30 boss main animation and fxs
 13:30-14:30 boss IA started, ensure infinite BG
-14:30-17:50 boss fight and victory done
+
+14:30-15:00 lunch
+
+15:00-17:50 boss fight and victory done
 17:50-18:45 title screen
 18:45-22:10 music
 
 22:10-22:50 McDo
 
-22:50- sfx
+22:50-00:30 sfx
+00:30-01:30 final gameplay fixes
+
+---
+Total ~26.5 hours
