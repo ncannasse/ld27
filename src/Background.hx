@@ -24,11 +24,11 @@ class Background {
 		
 		// SOIL
 		var sbg = [
-			{ r : hxd.Resource.embed("gfx/bg1.png"), n : 18 },
-			{ r : hxd.Resource.embed("gfx/bg1atrans.png"), n : 1 },
-			{ r : hxd.Resource.embed("gfx/bg1a.png"), n : 22 },
-			{ r : hxd.Resource.embed("gfx/bg1btrans.png"), n : 1 },
-			{ r : hxd.Resource.embed("gfx/bg1b.png"), n : 22+4 },
+			{ r : hxd.Res.bg1, n : 18 },
+			{ r : hxd.Res.bg1atrans, n : 1 },
+			{ r : hxd.Res.bg1a, n : 22 },
+			{ r : hxd.Res.bg1btrans, n : 1 },
+			{ r : hxd.Res.bg1b, n : 22+4 },
 		];
 		var px = 0;
 		for( k in sbg ) {
@@ -45,14 +45,14 @@ class Background {
 
 		
 		// MOUNTAINS
-		var bgb = hxd.Resource.embed("gfx/bgb.png");
+		var bgb = hxd.Res.bgb;
 		var sbg = [
-			{ r : hxd.Resource.embed("gfx/bg.png"), n : 9, p : 6 },
-			{ r : hxd.Resource.embed("gfx/bgatrans.png"), n : 1, p : 1 },
-			{ r : hxd.Resource.embed("gfx/bga.png"), n : 11, p : 7 },
-			{ r : hxd.Resource.embed("gfx/bgbtrans.png"), n : 1, p : 1},
+			{ r : hxd.Res.bg, n : 9, p : 6 },
+			{ r : hxd.Res.bgatrans, n : 1, p : 1 },
+			{ r : hxd.Res.bga, n : 11, p : 7 },
+			{ r : hxd.Res.bgbtrans, n : 1, p : 1},
 			{ r : bgb, n : 11, p : 3 },
-			{ r : hxd.Resource.embed("gfx/bgbend.png"), n : 0, p : 1 },
+			{ r : hxd.Res.bgbend, n : 0, p : 1 },
 			{ r : bgb, n : 4, p : 0 },
 		];
 		var px = 0;
@@ -82,10 +82,10 @@ class Background {
 		
 		// SKY
 		var sbg = [
-			{ r : hxd.Resource.embed("gfx/bg2.png"), n : 1 },
-			{ r : hxd.Resource.embed("gfx/bg2a.png"), n : 1 },
-			{ r : hxd.Resource.embed("gfx/bg2b.png"), n : 1 },
-			{ r : hxd.Resource.embed("gfx/bg2c.png"), n : 1 },
+			{ r : hxd.Res.bg2, n : 1 },
+			{ r : hxd.Res.bg2a, n : 1 },
+			{ r : hxd.Res.bg2b, n : 1 },
+			{ r : hxd.Res.bg2c, n : 1 },
 		];
 		var px = 0;
 		for( k in sbg ) {

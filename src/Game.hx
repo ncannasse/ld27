@@ -143,8 +143,7 @@ class Game {
 		];
 		
 		this.engine = e;
-		h2d.Font.embed("Verdana", "gfx/Verdana.ttf");
-		font = new h2d.Font("Verdana", 32);
+		font = new h2d.Font("Verdana.ttf", 32);
 		font.halfSize();
 		scene = new h2d.Scene();
 		scene.setFixedSize(Std.int(hxd.System.width / 3), Std.int(hxd.System.height / 3));
@@ -183,7 +182,7 @@ class Game {
 		hero.x = waveDist;
 		world.x = -waveDist;
 		
-		var rexpl = hxd.Resource.embed("gfx/explode.png");
+		var rexpl = hxd.Res.explode;
 		
 		var parts = world;
 		
@@ -194,7 +193,7 @@ class Game {
 		expl.color = new h3d.Vector(1, 0.6, 0., 1);
 		
 
-		stones = new h2d.SpriteBatch(hxd.Resource.embed("gfx/smallStone.png").toTile().center(8, 8), parts);
+		stones = new h2d.SpriteBatch(hxd.Res.smallStone.toTile().center(8, 8), parts);
 		stones.colorKey = 0x5E016D;
 		stones.hasRotationScale = true;
 		stones.hasUpdate = true;
@@ -205,7 +204,7 @@ class Game {
 		fire.blendMode = Add;
 		fire.color = new h3d.Vector(1, 0., 0., 1);
 
-		smoke = new h2d.SpriteBatch(hxd.Resource.embed("gfx/smoke.png").toTile().center(16,16), parts);
+		smoke = new h2d.SpriteBatch(hxd.Res.smoke.toTile().center(16,16), parts);
 		smoke.colorKey = 0x5E016D;
 		smoke.hasRotationScale = true;
 		smoke.hasUpdate = true;
@@ -417,7 +416,7 @@ class Game {
 			hero.anim.currentFrame = 1;
 			var wait = 0.;
 			if( win ) {
-				var v = new h2d.Bitmap(hxd.Resource.embed("gfx/victory.png").toTile(), scene);
+				var v = new h2d.Bitmap(hxd.Res.victory.toTile(), scene);
 				v.x = -v.tile.width;
 				v.alpha = 0.8;
 				v.y = 40;
@@ -499,8 +498,9 @@ class Game {
 		inst.init();
 		title = null;
 	}
-	
+
 	public static function main() {
+		hxd.Res.loader = hxd.res.EmbedFileSystem.create();
 		new Music().play(0, 100000);
 		_ENGINE = new h3d.Engine(false);
 		_ENGINE.backgroundColor = 0xFF808080;

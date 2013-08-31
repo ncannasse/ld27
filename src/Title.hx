@@ -18,16 +18,16 @@ class Title {
 		this.engine = engine;
 		this.scene = new h2d.Scene();
 		scene.setFixedSize(250, 150);
-		bg2 = new h2d.Bitmap(hxd.Resource.embed("gfx/title2.png").toTile(), scene);
-		bg1 = new h2d.Bitmap(hxd.Resource.embed("gfx/title1.png").toTile(), scene);
-		bg3 = new h2d.Bitmap(hxd.Resource.embed("gfx/title3.png").toTile(), scene);
+		bg2 = new h2d.Bitmap(hxd.Res.title2.toTile(), scene);
+		bg1 = new h2d.Bitmap(hxd.Res.title1.toTile(), scene);
+		bg3 = new h2d.Bitmap(hxd.Res.title3.toTile(), scene);
 		bg1.colorKey = 0;
 		bg1.y = -bg1.tile.height + 50;
 		bg3.y = -bg3.tile.height;
 		bg3.colorKey = 0;
 		bg3.x = scene.width - bg3.tile.width;
 		
-		var a = hxd.Resource.embed("gfx/star.png").toTile().split(11, true);
+		var a = hxd.Res.star.toTile().split(11, true);
 		for( i in 0...20 ) {
 			var s = new h2d.Anim(bg2);
 			s.x = Std.random(bg1.tile.width);

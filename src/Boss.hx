@@ -151,7 +151,7 @@ class Boss extends Fighter {
 					moveSpeed *= dx / 50;
 					if( moveSpeed < 1 ) {
 						moveSpeed = 0;
-						play(hxd.Resource.embed("gfx/boss_hurt.png"),94);
+						play(hxd.Res.boss_hurt,94);
 						stopped = true;
 					}
 				}

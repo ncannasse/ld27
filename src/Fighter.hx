@@ -41,7 +41,7 @@ class Fighter {
 	public var life : Float;
 	public var maxLife : Float;
 	
-	var defaultRes : hxd.Resource.BitmapRes;
+	var defaultRes : hxd.res.Texture;
 	
 	public function new(k) {
 		this.kind = k;
@@ -105,41 +105,41 @@ class Fighter {
 		}
 		var res = switch( kind ) {
 		case Hero:
-			hxd.Resource.embed("gfx/hero.png");
+			hxd.Res.hero;
 		case Slime:
-			hxd.Resource.embed("gfx/slime.png");
+			hxd.Res.slime;
 		case Goblin:
-			hxd.Resource.embed("gfx/knight.png");
+			hxd.Res.knight;
 		case Time:
 			anim.scale(0.7);
-			hxd.Resource.embed("gfx/clock.png");
+			hxd.Res.clock;
 		case LaserAnim:
-			hxd.Resource.embed("gfx/laserAnim.png");
+			hxd.Res.laserAnim;
 		case Chain:
 			size = 120;
 			center = 0;
 			mc.y -= 132;
 			pushPower = 5;
-			hxd.Resource.embed("gfx/chain.png");
+			hxd.Res.chain;
 		case FChest(k,_):
 			switch(k) {
 			case Shield:
-				hxd.Resource.embed("gfx/shield.png");
+				hxd.Res.shield;
 			case Slide:
-				hxd.Resource.embed("gfx/timeBonus.png");
+				hxd.Res.timeBonus;
 			case Laser:
-				hxd.Resource.embed("gfx/laser.png");
+				hxd.Res.laser;
 			}
 		case Fireball:
-			hxd.Resource.embed("gfx/fireBall.png");
+			hxd.Res.fireBall;
 		case Wizard:
-			hxd.Resource.embed("gfx/wizard.png");
+			hxd.Res.wizard;
 		case Stone:
-			hxd.Resource.embed("gfx/stone.png");
+			hxd.Res.stone;
 		case Crow:
-			hxd.Resource.embed("gfx/crow.png");
+			hxd.Res.crow;
 		case Missile:
-			hxd.Resource.embed("gfx/missile.png");
+			hxd.Res.missile;
 		case Boss:
 			
 			mc.scale(1.5);
@@ -154,7 +154,7 @@ class Fighter {
 			for( i in 0...10 ) {
 				var r = new h2d.Anim(mc);
 				r.speed = 20;
-				r.play([for( t in hxd.Resource.embed("gfx/reactor.png").toTile().split(5, true) ) t.center(0,16)]);
+				r.play([for( t in hxd.Res.reactor.toTile().split(5, true) ) t.center(0,16)]);
 				r.blendMode = Add;
 				r.alpha = 0.2;
 				var m = new h3d.Matrix();
@@ -166,7 +166,7 @@ class Fighter {
 				fire.push(r);
 			}
 			
-			var h = new h2d.Bitmap(hxd.Resource.embed("gfx/redHalo.png").toTile(), mc);
+			var h = new h2d.Bitmap(hxd.Res.redHalo.toTile(), mc);
 			h.y = -22;
 			h.x = 25;
 			h.colorKey = 0x5E016D;
@@ -184,14 +184,14 @@ class Fighter {
 				return true;
 			});
 			
-			hxd.Resource.embed("gfx/boss.png");
+			hxd.Res.boss;
 		};
 		maxLife = life;
 		defaultRes = res;
 		play(res, size, center);
 	}
 	
-	public function play(?res:hxd.Resource.BitmapRes, size = 32, center = 1) {
+	public function play(?res:hxd.res.Texture, size = 32, center = 1) {
 		if( res == null ) res = defaultRes;
 		var t = res.toTile();
 		var cy = size * center;

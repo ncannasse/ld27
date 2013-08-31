@@ -63,7 +63,7 @@ class Hero extends Fighter {
 	public function block() {
 		if( pause > 0 )
 			return;
-		play(hxd.Resource.embed("gfx/hero_block.png"));
+		play(hxd.Res.hero_block);
 		pause = 30;
 		slow = 30;
 		blocking = true;
@@ -74,7 +74,7 @@ class Hero extends Fighter {
 		if( pause > 0 )
 			return;
 		Sounds.play("slide");
-		play(hxd.Resource.embed("gfx/hero_slide.png"));
+		play(hxd.Res.hero_slide);
 		pause = 30;
 		slow = 30;
 		sliding = true;
@@ -92,7 +92,7 @@ class Hero extends Fighter {
 		Sounds.play("laser");
 		laserRecover = true;
 		
-		play(lock);
+		play(hxd.Res.hero_lock);
 		pause = 100;
 		slow = 100;
 		moveSpeed = 0;
@@ -135,8 +135,6 @@ class Hero extends Fighter {
 		});
 	}
 	
-	static var lock = hxd.Resource.embed("gfx/hero_lock.png");
-	
 	public function action( m : Fighter ) {
 		if( pause > 0 )
 			return;
@@ -145,7 +143,7 @@ class Hero extends Fighter {
 			pause = 20;
 			slow = 10.;
 			moveSpeed = 0;
-			play(lock);
+			play(hxd.Res.hero_lock);
 			return;
 		}
 		
