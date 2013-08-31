@@ -143,7 +143,7 @@ class Game {
 		];
 		
 		this.engine = e;
-		font = new h2d.Font("Verdana.ttf", 32);
+		font = new h2d.Font("Verdana Gras", 32);
 		font.halfSize();
 		scene = new h2d.Scene();
 		scene.setFixedSize(Std.int(hxd.System.width / 3), Std.int(hxd.System.height / 3));
@@ -500,7 +500,7 @@ class Game {
 	}
 
 	public static function main() {
-		hxd.Res.loader = hxd.res.EmbedFileSystem.create();
+		hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create({compressSounds:true}));
 		new Music().play(0, 100000);
 		_ENGINE = new h3d.Engine(false);
 		_ENGINE.backgroundColor = 0xFF808080;
