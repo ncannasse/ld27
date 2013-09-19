@@ -3,7 +3,7 @@ class Timer {
 
 	public static var wantedFPS = 60;
 	public static var maxDeltaTime = 0.5;
-	public static var oldTime = flash.Lib.getTimer();
+	public static var oldTime = haxe.Timer.stamp();
 	public static var tmod_factor = 0.95;
 	public static var calc_tmod : Float = 1;
 	public static var tmod : Float = 1;
@@ -12,8 +12,8 @@ class Timer {
 
 	public inline static function update() {
 		frameCount++;
-		var newTime = flash.Lib.getTimer();
-		deltaT = (newTime - oldTime) / 1000.0;
+		var newTime = haxe.Timer.stamp();
+		deltaT = newTime - oldTime;
 		oldTime = newTime;
 		if( deltaT < maxDeltaTime )
 			calc_tmod = calc_tmod * tmod_factor + (1 - tmod_factor) * deltaT * wantedFPS;

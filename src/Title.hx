@@ -12,7 +12,8 @@ class Title {
 	var bg3Ready : Null<Float>;
 	var time : Float = 0.;
 	
-	var start : flash.text.TextField;
+	var start : Game.Text;
+	var font : h2d.Font;
 	
 	public function new(engine) {
 		this.engine = engine;
@@ -75,6 +76,7 @@ class Title {
 			if( bg2.y < -k ) bg2.y = -k;
 		} else {
 			if( start == null ) {
+				#if flash
 				var t = new flash.text.TextField();
 				flash.Lib.current.addChild(t);
 				var fmt = t.defaultTextFormat;
@@ -84,6 +86,9 @@ class Title {
 				t.filters = [new flash.filters.GlowFilter(0, 0.5, 2, 2, 10)];
 				t.width = 1000;
 				t.selectable = false;
+				#else
+				var t = new h2d.Text(font,scene);
+				#end
 				t.textColor = 0xFFFFFF;
 				
 				var french = hxd.System.lang == "fr";
@@ -94,11 +99,12 @@ class Title {
 			}
 			start.visible = Std.int(time / 25) & 1 == 0;
 		}
-		engine.render(scene);
-		if( Key.isToggled("A".code) || Key.isToggled("Q".code) ) {
+		if( hxd.Key.isPressed("A".code) || hxd.Key.isPressed("Q".code) ) {
 			dispose();
 			Game.start();
+			return;
 		}
+		engine.render(scene);
 	}
 	
 }

@@ -1,3 +1,11 @@
+import hxd.Key;
+
+#if flash
+typedef Text = flash.text.TextField;
+#else
+typedef Text = h2d.Text;
+#end
+
 typedef K = hxd.Key;
 
 enum Wave {
@@ -9,8 +17,10 @@ enum Wave {
 	End;
 }
 
+#if flash
 @:sound("music.mp3") class Music extends flash.media.Sound {
 }
+#end
 
 @:publicFields
 class Game {
@@ -31,24 +41,24 @@ class Game {
 	var world : h2d.Sprite;
 	var bg : Background;
 	var font : h2d.Font;
-	var lastCheck : Int;
+	var lastCheck : Int = 0;
 	
 	var todo : Array < Float -> Bool >;
-	var wavePos : Int;
-	var waveCount : Int;
-	var waveDist : Int;
+	var wavePos : Int = 0;
+	var waveCount : Int = 0;
+	var waveDist : Int = 0;
 	
 	var nextTime : Float;
-	var remTime : flash.text.TextField;
-	
+
+	var remTime : Text;
 	var isGameOver : Bool;
-	var allTexts : Array<flash.text.TextField>;
-	var prev : flash.text.TextField;
+	var allTexts : Array<Text>;
+	var prev : Text;
 	
 	var boss : Boss;
 	
 	var win : Bool;
-	var bossHint : Int;
+	var bossHint : Int = 0;
 	
 	public function new(e,pos) {
 		
@@ -146,7 +156,7 @@ class Game {
 		font = new h2d.Font("Verdana Gras", 32);
 		font.halfSize();
 		scene = new h2d.Scene();
-		scene.setFixedSize(Std.int(hxd.System.width / 3), Std.int(hxd.System.height / 3));
+		scene.setFixedSize(250,150);
 	}
 		
 	public function init() {
@@ -220,6 +230,7 @@ class Game {
 	}
 	
 	function newText() {
+		#if flash
 		var t = new flash.text.TextField();
 		flash.Lib.current.addChild(t);
 		var fmt = t.defaultTextFormat;
@@ -229,6 +240,9 @@ class Game {
 		t.filters = [new flash.filters.GlowFilter(0, 0.5, 2, 2, 10)];
 		t.width = 1000;
 		t.selectable = false;
+		#else
+		var t = new h2d.Text(font,scene);
+		#end
 		t.textColor = 0xFFFFFF;
 		allTexts.push(t);
 		return t;
@@ -318,16 +332,16 @@ class Game {
 			}
 		}
 		
-		if( Key.isToggled("A".code) || Key.isToggled("Q".code) )
+		if( Key.isPressed("A".code) || Key.isPressed("Q".code) )
 			hero.action(first);
-		if( (Key.isToggled("Z".code) || Key.isToggled("W".code)) && hero.has(Slide) )
+		if( (Key.isPressed("Z".code) || Key.isPressed("W".code)) && hero.has(Slide) )
 			hero.slide();
-		if( Key.isToggled("E".code) && hero.has(Shield) )
+		if( Key.isPressed("E".code) && hero.has(Shield) )
 			hero.block();
-		if( Key.isToggled("R".code) && hero.has(Laser) )
+		if( Key.isPressed("R".code) && hero.has(Laser) )
 			hero.laser();
 			
-		if( Key.isToggled(27) ) {
+		if( Key.isPressed(27) ) {
 			haxe.Timer.delay(function() {
 				dispose();
 				inst = new Game(engine, 0);
@@ -456,7 +470,7 @@ class Game {
 		var t = newText();
 		t.textColor = color;
 		t.text = text;
-		t.x = (t.stage.stageWidth - t.textWidth) * 0.5;
+		t.x = (#if flash hxd.System.width #else scene.width #end - t.textWidth) * 0.5;
 		t.y = 330;
 		prev = t;
 		if( cond == null )
@@ -501,13 +515,15 @@ class Game {
 
 	public static function main() {
 		hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create({compressSounds:true}));
+		#if flash
 		new Music().play(0, 100000);
+		#end
 		_ENGINE = new h3d.Engine(false);
 		_ENGINE.backgroundColor = 0xFF808080;
 		_ENGINE.onReady = function() {
+			Key.initialize();
 			showTitle();
 			hxd.System.setLoop(doUpdate);
-			Key.init();
 		};
 		_ENGINE.init();
 	}
