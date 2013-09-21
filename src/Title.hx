@@ -12,8 +12,7 @@ class Title {
 	var bg3Ready : Null<Float>;
 	var time : Float = 0.;
 	
-	var start : Game.Text;
-	var font : h2d.Font;
+	var start : h2d.Text;
 	
 	public function new(engine) {
 		this.engine = engine;
@@ -76,26 +75,15 @@ class Title {
 			if( bg2.y < -k ) bg2.y = -k;
 		} else {
 			if( start == null ) {
-				#if flash
-				var t = new flash.text.TextField();
-				flash.Lib.current.addChild(t);
-				var fmt = t.defaultTextFormat;
-				fmt.font = "Verdana";
-				fmt.size = 24;
-				t.defaultTextFormat = fmt;
-				t.filters = [new flash.filters.GlowFilter(0, 0.5, 2, 2, 10)];
-				t.width = 1000;
-				t.selectable = false;
-				#else
-				var t = new h2d.Text(font,scene);
-				#end
+				var t = new h2d.Text(Game.getFont(),scene);
+				t.x = 173;
+				t.y = 133;
 				t.textColor = 0xFFFFFF;
+				t.scale(1 / 3);
+				start = t;
 				
 				var french = hxd.System.lang == "fr";
 				t.text = "Press " + (french?"A":"Q") + " to Start";
-				t.x = 520;
-				t.y = 400;
-				start = t;
 			}
 			start.visible = Std.int(time / 25) & 1 == 0;
 		}

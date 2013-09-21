@@ -298,13 +298,14 @@ class Fighter {
 		
 		spr.x = x - anim.scaleX * 16;
 		spr.y = mc.y - 16;
+		spr.scale(1 / 3);
 		
 		t.alpha = 2;
 		
 		var k = 0.;
 		
 		game.todo.push(function(dt) {
-			t.y -= 100 * dt / (k + 10);
+			t.y -= 250 * dt / (k + 10);
 			k += dt;
 			spr.rotate(spr.rotation * 0.03 * dt);
 			t.alpha -= 0.04 * dt;

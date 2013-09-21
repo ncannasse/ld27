@@ -1,11 +1,5 @@
 import hxd.Key;
 
-#if flash
-typedef Text = flash.text.TextField;
-#else
-typedef Text = h2d.Text;
-#end
-
 typedef K = hxd.Key;
 
 enum Wave {
@@ -26,7 +20,11 @@ enum Wave {
 class Game {
 	
 	static inline var BASEY = 130;
-	
+	static var FONT_NAME = hxd.res.Embed.embedFont("Verdana.ttf");
+	static function getFont() {
+		var f = hxd.res.FontBuilder.getFont(FONT_NAME, 24, { antiAliasing : false } );
+		return f;
+	}
 	
 	var wavesData : Array<Wave>;
 	var fighters : Array<Fighter>;
@@ -50,10 +48,10 @@ class Game {
 	
 	var nextTime : Float;
 
-	var remTime : Text;
+	var remTime : h2d.Text;
 	var isGameOver : Bool;
-	var allTexts : Array<Text>;
-	var prev : Text;
+	var allTexts : Array<h2d.Text>;
+	var prev : h2d.Text;
 	
 	var boss : Boss;
 	
@@ -153,8 +151,7 @@ class Game {
 		];
 		
 		this.engine = e;
-		font = new h2d.Font("Verdana Gras", 32);
-		font.halfSize();
+		font = getFont();
 		scene = new h2d.Scene();
 		scene.setFixedSize(250,150);
 	}
@@ -221,8 +218,8 @@ class Game {
 		smoke.alpha = 0.5;
 		
 		remTime = newText();
-		remTime.x = 120;
-		remTime.y = 400;
+		remTime.x = 40;
+		remTime.y = 134;
 		
 		nextTime = haxe.Timer.stamp() + 10;
 		
@@ -230,19 +227,8 @@ class Game {
 	}
 	
 	function newText() {
-		#if flash
-		var t = new flash.text.TextField();
-		flash.Lib.current.addChild(t);
-		var fmt = t.defaultTextFormat;
-		fmt.font = "Verdana";
-		fmt.size = 24;
-		t.defaultTextFormat = fmt;
-		t.filters = [new flash.filters.GlowFilter(0, 0.5, 2, 2, 10)];
-		t.width = 1000;
-		t.selectable = false;
-		#else
-		var t = new h2d.Text(font,scene);
-		#end
+		var t = new h2d.Text(font, scene);
+		t.scale(1 / 3);
 		t.textColor = 0xFFFFFF;
 		allTexts.push(t);
 		return t;
@@ -470,8 +456,8 @@ class Game {
 		var t = newText();
 		t.textColor = color;
 		t.text = text;
-		t.x = (#if flash hxd.System.width #else scene.width #end - t.textWidth) * 0.5;
-		t.y = 330;
+		t.x = (scene.width - t.textWidth * t.scaleX) * 0.5;
+		t.y = 110;
 		prev = t;
 		if( cond == null )
 			t.alpha = 2;
