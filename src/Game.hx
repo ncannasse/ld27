@@ -20,10 +20,9 @@ enum Wave {
 class Game {
 	
 	static inline var BASEY = 130;
-	static var FONT_NAME = hxd.res.Embed.embedFont("Verdana.ttf");
+	
 	static function getFont() {
-		var f = hxd.res.FontBuilder.getFont(FONT_NAME, 24, { antiAliasing : false } );
-		return f;
+		return hxd.Res.verdana.toFont();
 	}
 	
 	var wavesData : Array<Wave>;
@@ -456,7 +455,7 @@ class Game {
 		var t = newText();
 		t.textColor = color;
 		t.text = text;
-		t.x = (scene.width - t.textWidth * t.scaleX) * 0.5;
+		t.x = Std.int((scene.width - t.textWidth * t.scaleX) * 0.5);
 		t.y = 110;
 		prev = t;
 		if( cond == null )
