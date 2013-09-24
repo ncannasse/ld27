@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	
+	<meta title="ld27gl" package="com.example.testgl" version="1.0.0" company="Company Name" />
+	<app main="Boot" path="bin" file="ld27" />
+	
+	<source path="src" />
+	<source path="lib" />
+	
+	<haxelib name="openfl" />
+	<haxelib name="h3d" />
+	
+	<assets path="res" rename="res"/>
+	<icon path="openfl.svg" />
+	
+</project>

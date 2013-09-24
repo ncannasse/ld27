@@ -499,7 +499,11 @@ class Game {
 	}
 
 	public static function main() {
-		hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create({compressSounds:true}));
+		#if cpp
+		hxd.Res.loader = new hxd.res.Loader(new hxd.res.LocalFileSystem("res"));
+		#else
+		hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create( { compressSounds:true } ));
+		#end
 		#if flash
 		new Music().play(0, 100000);
 		#end
