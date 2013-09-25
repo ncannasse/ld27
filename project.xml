@@ -4,8 +4,8 @@
 	<meta title="ld27gl" package="com.example.testgl" version="1.0.0" company="Company Name" />
 	<app main="Boot" path="bin" file="ld27" />
 	
-	<window width="750" height="450"/>
-	
+	<window width="750" height="450" background="#FFFFFF" fps="60" hardware="true" allow-shaders="true" require-shaders="true" stencil-buffer="false"/>
+
 	<source path="src" />
 	<source path="lib" />
 	
