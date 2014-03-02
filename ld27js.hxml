@@ -2,5 +2,5 @@
 -cp lib
 -js ld27.js
 -main Game
--lib h3d
+-lib heaps
 -dce full

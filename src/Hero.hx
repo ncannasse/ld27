@@ -180,7 +180,7 @@ class Hero extends Fighter {
 				p.dx *= 2;
 				p.gravity *= 1.5;
 				p.bounce = 0.4;
-				p.alpha = 1;
+				p.a = 1;
 				p.x -= 16;
 				p.y -= 16;
 				game.stones.add(p);

@@ -196,7 +196,10 @@ class Game {
 		expl.hasRotationScale = true;
 		expl.hasUpdate = true;
 		expl.blendMode = Add;
-		expl.color = new h3d.Vector(1, 0.6, 0., 1);
+		#if h3d
+		expl.color = new h3d.Vector();
+		#end
+		expl.color.set(1, 0.6, 0., 1);
 		
 
 		stones = new h2d.SpriteBatch(hxd.Res.smallStone.toTile().center(8, 8), parts);
@@ -208,7 +211,10 @@ class Game {
 		fire.hasRotationScale = true;
 		fire.hasUpdate = true;
 		fire.blendMode = Add;
-		fire.color = new h3d.Vector(1, 0., 0., 1);
+		#if h3d
+		fire.color = new h3d.Vector();
+		#end
+		fire.color.set(1, 0., 0., 1);
 
 		smoke = new h2d.SpriteBatch(hxd.Res.smoke.toTile().center(16,16), parts);
 		smoke.colorKey = 0x5E016D;

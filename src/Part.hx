@@ -10,7 +10,7 @@ class Part extends h2d.SpriteBatch.BatchElement {
 	public function new(e, x, y) {
 		super(e);
 		scale = 0.25;
-		alpha = 0.5;
+		a = 0.5;
 		gravity = 1;
 		ds = 0;
 		z = (Math.random() + 0.5) * 16;
@@ -31,8 +31,8 @@ class Part extends h2d.SpriteBatch.BatchElement {
 		var dr = (dx * dx + dy * dy) * 0.1;
 		rotation += dr;
 		if( dr < 0.1 ) {
-			alpha -= 0.02 * dt;
-			if( alpha < 0 )
+			a -= 0.02 * dt;
+			if( a < 0 )
 				return false;
 		}
 		if( gravity > 0 && y > Game.BASEY + z ) {
@@ -50,7 +50,7 @@ class Boom extends Part {
 		dy = 0;
 		dx = 0;
 		gravity = 0;
-		alpha = 0.5;
+		a = 0.5;
 		scale = 0;
 		ds = 0.1;
 	}

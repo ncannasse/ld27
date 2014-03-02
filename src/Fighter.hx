@@ -41,7 +41,7 @@ class Fighter {
 	public var life : Float;
 	public var maxLife : Float;
 	
-	var defaultRes : hxd.res.Texture;
+	var defaultRes : hxd.res.Image;
 	
 	public function new(k) {
 		this.kind = k;
@@ -191,7 +191,7 @@ class Fighter {
 		play(res, size, center);
 	}
 	
-	public function play(?res:hxd.res.Texture, size = 32, center = 1) {
+	public function play(?res:hxd.res.Image, size = 32, center = 1) {
 		if( res == null ) res = defaultRes;
 		var t = res.toTile();
 		var cy = size * center;
@@ -290,9 +290,11 @@ class Fighter {
 		var spr = new h2d.Sprite(game.world);
 		var t = new h2d.Text(game.font, spr);
 		t.text = txt;
-		t.color = h3d.Vector.fromColor(color);
-		t.color.w = 1;
-		t.dropShadow = { dx : 0, dy : 1, color : 0x808080, alpha : 0.5 };
+		#if h3d
+		t.color = new h3d.Vector();
+		#end
+		t.color.setColor(color | 0xFF000000);
+		t.dropShadow = #if heaps { x : 0, y : 1, color : 0x808080, alpha : 0.5 } #else { dx : 0, dy : 1, color : 0x808080, alpha : 0.5 } #end;
 		t.x = -t.textWidth * 0.5;
 		t.y = -t.textHeight * 0.5;
 		
