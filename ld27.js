@@ -436,7 +436,7 @@ Fighter.prototype = {
 			var _g1 = this.kind;
 			switch(_g1[1]) {
 			case 4:
-				if(bmp != null && bmp.parent != null) bmp.parent.removeChild(bmp);
+				if(bmp.parent != null) bmp.parent.removeChild(bmp);
 				return;
 			case 7:
 				var _g11 = bmp;
@@ -4328,7 +4328,7 @@ h2d.SpriteBatch.prototype = $extend(h2d.Drawable.prototype,{
 			}
 			e = e.next;
 		}
-		var stride = 5;
+		var stride = 8;
 		var nverts = pos / stride | 0;
 		var buffer = ctx.engine.mem.alloc(nverts,stride,4);
 		buffer.uploadVector(this.tmpBuf,0,nverts);
@@ -13396,7 +13396,7 @@ hxsl.Linker.prototype = {
 				return v2;
 			}
 		}
-		var vid = this.allVars.length;
+		var vid = this.allVars.length + 1;
 		var v21 = { id : vid, name : vname, type : v.type, kind : v.kind, qualifiers : v.qualifiers, parent : parent};
 		var a1 = new hxsl._Linker.AllocatedVar();
 		a1.v = v21;
