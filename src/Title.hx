@@ -1,32 +1,27 @@
 
-class Title {
+class Title extends hxd.App {
 
-	var engine : h3d.Engine;
-	var scene : h2d.Scene;
-	
 	var bg1 : h2d.Bitmap;
 	var bg2 : h2d.Bitmap;
 	var bg3 : h2d.Bitmap;
-	
+
 	var bg1Ready : Null<Float>;
 	var bg3Ready : Null<Float>;
 	var time : Float = 0.;
-	
+
 	var start : h2d.Text;
-	
-	public function new(engine) {
-		this.engine = engine;
-		this.scene = new h2d.Scene();
-		scene.setFixedSize(250, 150);
-		bg2 = new h2d.Bitmap(hxd.Res.title2.toTile(), scene);
-		bg1 = new h2d.Bitmap(hxd.Res.title1.toTile(), scene);
-		bg3 = new h2d.Bitmap(hxd.Res.title3.toTile(), scene);
+
+	override function init() {
+		s2d.setFixedSize(250, 150);
+		bg2 = new h2d.Bitmap(hxd.Res.title2.toTile(), s2d);
+		bg1 = new h2d.Bitmap(hxd.Res.title1.toTile(), s2d);
+		bg3 = new h2d.Bitmap(hxd.Res.title3.toTile(), s2d);
 		bg1.colorKey = 0;
 		bg1.y = -bg1.tile.height + 50;
 		bg3.y = -bg3.tile.height;
 		bg3.colorKey = 0;
-		bg3.x = scene.width - bg3.tile.width;
-		
+		bg3.x = s2d.width - bg3.tile.width;
+
 		var a = hxd.Res.star.toTile().split(11, true);
 		for( i in 0...20 ) {
 			var s = new h2d.Anim(bg2);
@@ -39,15 +34,15 @@ class Title {
 			s.play(a);
 		}
 	}
-	
-	public function dispose() {
+
+	override function dispose() {
+		super.dispose();
 		if( start != null && start.parent != null )
 			start.parent.removeChild(start);
-		scene.dispose();
+		s2d.dispose();
 	}
 
-	public function update() {
-		var dt = Timer.tmod;
+	override function update(dt:Float) {
 		time += dt;
 		if( bg1.y < 0 && bg1Ready == null ) {
 			bg1.y += dt - bg1.y * 0.05;
@@ -75,13 +70,13 @@ class Title {
 			if( bg2.y < -k ) bg2.y = -k;
 		} else {
 			if( start == null ) {
-				var t = new h2d.Text(Game.getFont(),scene);
+				var t = new h2d.Text(Game.getFont(),s2d);
 				t.x = 173;
 				t.y = 133;
 				t.textColor = 0xFFFFFF;
 				t.scale(1 / 3);
 				start = t;
-				
+
 				var french = hxd.System.lang == "fr";
 				t.text = "Press " + (french?"A":"Q") + " to Start";
 			}
@@ -92,7 +87,6 @@ class Title {
 			Game.start();
 			return;
 		}
-		engine.render(scene);
 	}
-	
+
 }

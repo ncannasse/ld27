@@ -34,22 +34,22 @@ class Fighter {
 
 	public var pause : Float;
 	public var push : Float;
-	
+
 	public var hitCount : Int;
-	
+
 	public var attackPower : Float;
 	public var life : Float;
 	public var maxLife : Float;
-	
+
 	var defaultRes : hxd.res.Image;
-	
+
 	public function new(k) {
 		this.kind = k;
 		game = Game.inst;
-		
+
 		mc = new h2d.Sprite(game.fightCont);
 		mc.y = Game.BASEY;
-		
+
 		anim = new h2d.Anim(mc);
 		anim.colorKey = 0x5E016D;
 		anim.speed = 20 + Math.random() - 0.5;
@@ -141,20 +141,20 @@ class Fighter {
 		case Missile:
 			hxd.Res.missile;
 		case Boss:
-			
+
 			mc.scale(1.5);
 			anim.x += 10;
-			
+
 			anim.scaleX = 1;
 			mc.y += 8;
 			size = 94;
 			anim.colorKey = 0xFFFFFF;
-	
+
 			var fire = [];
 			for( i in 0...10 ) {
 				var r = new h2d.Anim(mc);
 				r.speed = 20;
-				r.play([for( t in hxd.Res.reactor.toTile().split(5, true) ) t.center(0,16)]);
+				r.play([for( t in hxd.Res.reactor.toTile().split(5, true) ) { t.dx = 0; t.dy = -16; t; }]);
 				r.blendMode = Add;
 				r.alpha = 0.2;
 				var m = new h3d.Matrix();
@@ -165,7 +165,7 @@ class Fighter {
 				r.x = 28;
 				fire.push(r);
 			}
-			
+
 			var h = new h2d.Bitmap(hxd.Res.redHalo.toTile(), mc);
 			h.y = -22;
 			h.x = 25;
@@ -175,7 +175,7 @@ class Fighter {
 			game.todo.push(function(dt) {
 				time += dt;
 				h.alpha = Math.sin(time * 0.1) * 0.2 + 0.2;
-				
+
 				for( i in 0...fire.length ) {
 					var a = i * Math.PI * 2 / fire.length;
 					fire[i].scaleY = Math.sin(time * 0.1 + a) * 0.8;
@@ -183,29 +183,29 @@ class Fighter {
 				}
 				return true;
 			});
-			
+
 			hxd.Res.boss;
 		};
 		maxLife = life;
 		defaultRes = res;
 		play(res, size, center);
 	}
-	
+
 	public function play(?res:hxd.res.Image, size = 32, center = 1) {
 		if( res == null ) res = defaultRes;
 		var t = res.toTile();
 		var cy = size * center;
 		var cx = switch( kind ) { case LaserAnim: 0; default: t.width >> 1; };
-		anim.play([for( a in t.split(Std.int(t.height/size), true) ) a.center(cx, cy)]);
+		anim.play([for( a in t.split(Std.int(t.height / size), true) ) { a.dx = -cx; a.dy = -cy; a; }]);
 	}
-	
+
 	public function get_x() {
 		return mc.x;
 	}
 	public function set_x(v) {
 		return mc.x = v;
 	}
-	
+
 	public function update(dt:Float) {
 		var pp = Math.max(5 * dt, Math.abs(push) * 0.25);
 		if( push > 0 ) {
@@ -230,18 +230,22 @@ class Fighter {
 		}
 		return true;
 	}
-	
+
 	public function remove() {
 		game.fighters.remove(this);
 		mc.remove();
 	}
-	
+
 	public function kill() {
 		var dr = 0.;
 		var dx = 5. + Math.random() * 3, dy = -(8. + Math.random() * 3);
 		remove();
 		var frame = anim.getFrame();
-		var bmp = new h2d.Bitmap(frame == null ? null : frame.center(16,16), game.fightCont);
+		var bmp = new h2d.Bitmap(frame, game.fightCont);
+		if( frame != null ) {
+			frame.dx = -16;
+			frame.dy = -16;
+		}
 		bmp.x = mc.x;
 		bmp.y = mc.y - 16;
 		bmp.scaleX = anim.scaleX;
@@ -255,11 +259,11 @@ class Fighter {
 			bmp.y -= 16 * 2;
 			Sounds.play("break");
 		case Time:
-			
+
 		default:
 			//Sounds.play("fly");
 		}
-		
+
 		game.todo.push(function(dt) {
 			switch( kind ) {
 			case Stone:
@@ -285,7 +289,7 @@ class Fighter {
 			return true;
 		});
 	}
-	
+
 	public function pop( txt : String, color : Int, size : Float = 1. ) {
 		var spr = new h2d.Sprite(game.world);
 		var t = new h2d.Text(game.font, spr);
@@ -294,18 +298,18 @@ class Fighter {
 		t.color = new h3d.Vector();
 		#end
 		t.color.setColor(color | 0xFF000000);
-		t.dropShadow = #if heaps { x : 0, y : 1, color : 0x808080, alpha : 0.5 } #else { dx : 0, dy : 1, color : 0x808080, alpha : 0.5 } #end;
+		t.dropShadow = { dx : 0, dy : 1, color : 0x808080, alpha : 0.5 };
 		t.x = -t.textWidth * 0.5;
 		t.y = -t.textHeight * 0.5;
-		
+
 		spr.x = x - anim.scaleX * 16;
 		spr.y = mc.y - 16;
 		spr.scale(1 / 3);
-		
+
 		t.alpha = 2;
-		
+
 		var k = 0.;
-		
+
 		game.todo.push(function(dt) {
 			t.y -= 250 * dt / (k + 10);
 			k += dt;
@@ -317,8 +321,8 @@ class Fighter {
 			}
 			return true;
 		});
-				
+
 		return spr;
 	}
-	
+
 }

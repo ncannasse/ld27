@@ -23,11 +23,12 @@ class Part extends h2d.SpriteBatch.BatchElement {
 		var dt = et * 60;
 		dx *= Math.pow(0.95, dt);
 		ds *= Math.pow(0.95, dt);
-		scale *= Math.pow(0.97 , dt);
+		scaleX *= Math.pow(0.97 , dt);
 		dy += gravity * dt;
 		x += dx * dt;
 		y += dy * dt;
-		scale += ds * dt;
+		scaleX += ds * dt;
+		scaleY = scaleX;
 		var dr = (dx * dx + dy * dy) * 0.1;
 		rotation += dr;
 		if( dr < 0.1 ) {

@@ -14,7 +14,7 @@ class Boss extends Fighter {
 	var act : Int;
 	var jump : Float;
 	var soilY : Float;
-	
+
 	public function new() {
 		super(Boss);
 		step = Appear;
@@ -22,13 +22,13 @@ class Boss extends Fighter {
 		soilY = mc.y;
 		life = maxLife = 300;
 	}
-	
+
 	override function update(dt) {
 		super.update(dt);
-		
+
 		if( x > game.hero.x + 400 )
 			x = game.hero.x + 400;
-		
+
 		if( pause < 0 && next != null ) {
 			var old = next;
 			next = null;
@@ -61,9 +61,9 @@ class Boss extends Fighter {
 					for( i in 0...4 )
 						new Fighter(Crow).x = game.hero.x + 350 + i * 30;
 				case 3,1:
-					
+
 					Sounds.play("missiles");
-					
+
 					var m0 = new Fighter(Missile);
 					m0.x = x + 100;
 					m0.mc.y -= 75;
@@ -73,7 +73,7 @@ class Boss extends Fighter {
 					m1.x = x + 150;
 					m1.mc.y -= 40;
 					m1.skip = true;
-					
+
 					for( i in 0...3 )
 						new Fighter(Missile).x = x + i * 50 + 200;
 				}
@@ -88,9 +88,9 @@ class Boss extends Fighter {
 			if( mc.y > soilY ) {
 				mc.y = soilY;
 				jump *= -0.5;
-			
+
 				Sounds.play("bossLand");
-				
+
 				var m = game.hero;
 				if( Math.abs(x - m.x) < 30 ) {
 					for( i in 0...50 ) {
@@ -101,7 +101,7 @@ class Boss extends Fighter {
 					m.push -= 250;
 					act--; // rejump
 				}
-				
+
 				if( Math.abs(jump) < 3 ) {
 					step = Evade;
 					skip = false;
@@ -125,7 +125,7 @@ class Boss extends Fighter {
 		}
 		return true;
 	}
-	
+
 	override function kill() {
 		step = Wait;
 		next = null;
@@ -160,7 +160,8 @@ class Boss extends Fighter {
 				for( i in 0...3 ) {
 					var p = new Part(game.smoke.tile, px, py);
 					p.gravity = 0;
-					p.scale *= 3;
+					p.scaleX *= 3;
+					p.scaleY = p.scaleX;
 					p.dx = (Math.random() - 0.5) * 5;
 					p.dy = (Math.random() - 0.7) * 5;
 					game.smoke.add(p);
@@ -180,7 +181,8 @@ class Boss extends Fighter {
 						var px = x + Math.random() * 40, py = mc.y - Math.random() * 40;
 						var p = new Part(game.expl.tile, px, py);
 						p.gravity = 0.5;
-						p.scale *= 3;
+						p.scaleX *= 3;
+						p.scaleY = p.scaleX;
 						p.dx = (Math.random() - 0.5) * 20;
 						p.dy = (-Math.random() - 0.7) * 7;
 						game.expl.add(p);

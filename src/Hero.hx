@@ -6,13 +6,13 @@ class Hero extends Fighter {
 	var next : Void -> Void;
 	var walkDist : Float = 0.;
 	var oldX = 0.;
-	
+
 	public var sliding : Bool;
 	public var slow : Float;
 	public var blocking : Bool;
 	public var inventory : Array<Fighter.CKind>;
 	public var laserRecover : Bool;
-	
+
 	public function new() {
 		super(Hero);
 		skip = true;
@@ -22,18 +22,18 @@ class Hero extends Fighter {
 		pause = 0;
 		slow = 0;
 	}
-	
+
 	public function has(c:Fighter.CKind) {
 		return Lambda.has(inventory, c);
 	}
-	
-	
+
+
 	override function update(dt:Float) {
-		
+
 		walk();
-		
+
 		super.update(dt);
-		
+
 		wait -= dt;
 		if( slow > 0 ) {
 			slow -= dt;
@@ -48,7 +48,7 @@ class Hero extends Fighter {
 		}
 		return true;
 	}
-	
+
 	public function walk() {
 		var dx = x - oldX;
 		if( dx > 0 && !sliding ) walkDist += dx;
@@ -59,7 +59,7 @@ class Hero extends Fighter {
 			walkDist -= 50;
 		}
 	}
-	
+
 	public function block() {
 		if( pause > 0 )
 			return;
@@ -80,7 +80,7 @@ class Hero extends Fighter {
 		sliding = true;
 		moveSpeed = game.boss != null ? 6 : 3;
 	}
-	
+
 	public function laser() {
 		if( pause > 0 )
 			return;
@@ -88,10 +88,10 @@ class Hero extends Fighter {
 			Sounds.play("laserOff");
 			return;
 		}
-		
+
 		Sounds.play("laser");
 		laserRecover = true;
-		
+
 		play(hxd.Res.hero_lock);
 		pause = 100;
 		slow = 100;
@@ -134,11 +134,11 @@ class Hero extends Fighter {
 			return true;
 		});
 	}
-	
+
 	public function action( m : Fighter ) {
 		if( pause > 0 )
 			return;
-		
+
 		if( m == null || m.x > x + 25 || m.maxLife == 0 ) {
 			pause = 20;
 			slow = 10.;
@@ -146,13 +146,13 @@ class Hero extends Fighter {
 			play(hxd.Res.hero_lock);
 			return;
 		}
-		
+
 		hit(m);
 		pause = 3;
 	}
-	
+
 	function hit( m : Fighter ) {
-		
+
 		switch( m.kind ) {
 		case Slime, Wizard:
 			Sounds.play("hit");
@@ -171,12 +171,13 @@ class Hero extends Fighter {
 			if( m.hitCount++ == 5 )
 				m.skip = true;
 		}
-		
+
 		switch( m.kind ) {
 		case Stone:
 			for( i in 0...4 ) {
 				var p = new Part(game.stones.tile, m.x + 20, m.mc.y);
-				p.scale *= 2 + Math.random();
+				p.scaleX *= 2 + Math.random();
+				p.scaleY = p.scaleX;
 				p.dx *= 2;
 				p.gravity *= 1.5;
 				p.bounce = 0.4;
@@ -204,13 +205,13 @@ class Hero extends Fighter {
 			for( i in 0...4 )
 				game.expl.add(new Part.Boom(game.expl.tile, m.x + ex + 10, m.mc.y - 10));
 		}
-		
+
 		var pv = Std.int((Math.random() * 0.5 + 1) * attackPower);
 		m.life -= pv;
 		m.pop("-" + pv, 0xFE9FA1).rotation = -(Math.random() + 0.5) * 0.5;
 		if( m.life <= 0 )
 			m.kill();
 	}
-	
+
 }
 

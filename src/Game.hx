@@ -17,19 +17,17 @@ enum Wave {
 #end
 
 @:publicFields
-class Game {
-	
+class Game extends hxd.App {
+
 	static inline var BASEY = 130;
-	
+
 	static function getFont() {
 		return hxd.Res.verdana.toFont();
 	}
-	
+
 	var wavesData : Array<Wave>;
 	var fighters : Array<Fighter>;
 	var fightCont : h2d.Sprite;
-	var engine : h3d.Engine;
-	var scene : h2d.Scene;
 	var hero : Hero;
 	var expl : h2d.SpriteBatch;
 	var smoke : h2d.SpriteBatch;
@@ -39,37 +37,37 @@ class Game {
 	var bg : Background;
 	var font : h2d.Font;
 	var lastCheck : Int = 0;
-	
+
 	var todo : Array < Float -> Bool >;
 	var wavePos : Int = 0;
 	var waveCount : Int = 0;
 	var waveDist : Int = 0;
-	
+
 	var nextTime : Float;
 
 	var remTime : h2d.Text;
 	var isGameOver : Bool;
 	var allTexts : Array<h2d.Text>;
 	var prev : h2d.Text;
-	
+
 	var boss : Boss;
-	
+
 	var win : Bool;
 	var bossHint : Int = 0;
-	
-	public function new(e,pos) {
-		
+
+	public function new(engine,pos) {
+
 		var french = hxd.System.lang == "fr";
 		wavePos = lastCheck = pos;
 		wavesData = [
-		
+
 			M(Slime,0),
 			Tuto("Press "+(french?"A":"Q")+" to attack monsters", function() return fighters.length == 1),
 			M(Slime, 200, 3),
 			M(Goblin, 300),
 			Tuto("Hit "+(french?"A":"Q")+" faster!", function() return fighters.length == 1),
 			M(Goblin, 300, 1),
-			
+
 			M(Time, 200),
 			Wait(500),
 			Chest(Slide, "Use "+(french?"Z":"W")+" to slide"),
@@ -79,7 +77,7 @@ class Game {
 			M(Crow, 40, 3),
 			Wait(200),
 			M(Crow, 40, 3),
-			
+
 			M(Time, 200),
 			M(Stone, 300),
 			Wait(300),
@@ -91,7 +89,7 @@ class Game {
 			Wait(300),
 			M(Fireball, 200, 3),
 			M(Wizard, 50),
-			
+
 			M(Time, 200),
 			Wait(50),
 			M(Fireball, 150, 3),
@@ -99,7 +97,7 @@ class Game {
 			Wait(50),
 			M(Fireball, 150, 3),
 			M(Wizard, 50),
-			
+
 			M(Time, 200),
 			Wait(100),
 			M(Crow, 40, 3),
@@ -121,9 +119,9 @@ class Game {
 			Wait(70),
 			M(Goblin, 50, 3),
 			M(Slime, 50, 5),
-			
+
 			M(Time, 50),
-			
+
 
 			Wait(100),
 			M(Goblin, 50, 3),
@@ -135,49 +133,47 @@ class Game {
 			Wait(50),
 			M(Slime, 50, 4),
 			M(Time, 100),
-						
+
 
 			Wait(800),
-			
+
 			Tuto("Warning ! Danger Approaching !", null, "warning"),
 			Wait(50),
 
 			M(Boss, 100),
 			M(Time, 500),
-		
+
 			M(Time, 1800),
 			End,
 		];
-		
-		this.engine = e;
-		font = getFont();
-		scene = new h2d.Scene();
-		scene.setFixedSize(250,150);
+
+		super(engine);
 	}
-		
-	public function init() {
-		
-		world = new h2d.Sprite(scene);
+
+	override function init() {
+		font = getFont();
+		s2d.setFixedSize(250,150);
+		world = new h2d.Sprite(s2d);
 		bg = new Background();
-		
+
 		todo = [];
 		allTexts = [];
-		
+
 		fightCont = new h2d.Sprite(world);
-		
+
 		fighters = [];
-		
+
 		hero = new Hero();
 
 
-		
+
 		if( wavePos == 0 )
 			for( i in 0...wavesData.length )
 				if( wavesData[i] == Resume ) {
 					wavePos = i;
 					break;
 				}
-			
+
 		for( i in 0...wavePos )
 			switch( wavesData[i] ) {
 			case Wait(d): waveDist += d;
@@ -187,12 +183,12 @@ class Game {
 			}
 		hero.x = waveDist;
 		world.x = -waveDist;
-		
+
 		var rexpl = hxd.Res.explode;
-		
+
 		var parts = world;
-		
-		expl = new h2d.SpriteBatch(rexpl.toTile().center(16,16), parts);
+
+		expl = new h2d.SpriteBatch(rexpl.toTile().center(), parts);
 		expl.hasRotationScale = true;
 		expl.hasUpdate = true;
 		expl.blendMode = Add;
@@ -200,14 +196,14 @@ class Game {
 		expl.color = new h3d.Vector();
 		#end
 		expl.color.set(1, 0.6, 0., 1);
-		
 
-		stones = new h2d.SpriteBatch(hxd.Res.smallStone.toTile().center(8, 8), parts);
+
+		stones = new h2d.SpriteBatch(hxd.Res.smallStone.toTile().center(), parts);
 		stones.colorKey = 0x5E016D;
 		stones.hasRotationScale = true;
 		stones.hasUpdate = true;
 
-		fire = new h2d.SpriteBatch(rexpl.toTile().center(16,16), parts);
+		fire = new h2d.SpriteBatch(rexpl.toTile().center(), parts);
 		fire.hasRotationScale = true;
 		fire.hasUpdate = true;
 		fire.blendMode = Add;
@@ -216,41 +212,38 @@ class Game {
 		#end
 		fire.color.set(1, 0., 0., 1);
 
-		smoke = new h2d.SpriteBatch(hxd.Res.smoke.toTile().center(16,16), parts);
+		smoke = new h2d.SpriteBatch(hxd.Res.smoke.toTile().center(), parts);
 		smoke.colorKey = 0x5E016D;
 		smoke.hasRotationScale = true;
 		smoke.hasUpdate = true;
 		smoke.alpha = 0.5;
-		
+
 		remTime = newText();
 		remTime.x = 40;
 		remTime.y = 134;
-		
+
 		nextTime = haxe.Timer.stamp() + 10;
-		
-		update();
 	}
-	
+
 	function newText() {
-		var t = new h2d.Text(font, scene);
+		var t = new h2d.Text(font, s2d);
 		t.scale(1 / 3);
 		t.textColor = 0xFFFFFF;
 		allTexts.push(t);
 		return t;
 	}
-	
-	function update() {
-		var dt = Timer.tmod;
-		
+
+	override function update(dt:Float) {
+
 		var first : Fighter = null;
 		for( f in fighters.copy() ) {
 			f.update(dt);
 			if( !f.skip && (first == null || f.x < first.x) )
 				first = f;
 		}
-		
+
 		if( isGameOver && first != null && first.kind == Time ) first = null;
-	
+
 		if( first != null && hero.x > first.x - 20 ) {
 			switch( first.kind ) {
 			case Time:
@@ -322,7 +315,7 @@ class Game {
 				first.x = h + 10;
 			}
 		}
-		
+
 		if( Key.isPressed("A".code) || Key.isPressed("Q".code) )
 			hero.action(first);
 		if( (Key.isPressed("Z".code) || Key.isPressed("W".code)) && hero.has(Slide) )
@@ -331,7 +324,7 @@ class Game {
 			hero.block();
 		if( Key.isPressed("R".code) && hero.has(Laser) )
 			hero.laser();
-			
+
 		if( Key.isPressed(27) ) {
 			haxe.Timer.delay(function() {
 				dispose();
@@ -340,14 +333,14 @@ class Game {
 			},0);
 			return;
 		}
-			
-			
-		
-		var tx = -Math.max(hero.x - scene.width * 0.2, 0);
+
+
+
+		var tx = -Math.max(hero.x - s2d.width * 0.2, 0);
 		var ws = Math.pow(0.5, dt);
 		world.x = Std.int(world.x * ws + (1 - ws) * tx);
 		bg.update( -world.x);
-		
+
 		switch( wavesData[wavePos] ) {
 		case Resume:
 			wavePos++;
@@ -381,35 +374,33 @@ class Game {
 		case End:
 			wavePos--;
 		}
-		
+
 		for( t in todo.copy() )
 			if( !t(dt) )
 				todo.remove(t);
-				
+
 		var vt = nextTime - haxe.Timer.stamp();
 		if( vt < 0.2 ) gameOver();
 		if( vt < 0 ) vt = 0;
 		remTime.text = Std.int(vt) + "'" + StringTools.rpad("" + Std.int((vt - Std.int(vt)) * 100), "0", 2);
 		var k = Std.int(vt * 255 / 10);
 		remTime.textColor = isGameOver ? 0 : (0xFF0000 | (k << 8) | k);
-		
-		scene.setElapsedTime(dt / 60);
-		engine.render(scene);
 	}
-	
+
 	function cleanTexts() {
 		for( t in allTexts )
 			if( t.parent != null )
 				t.parent.removeChild(t);
 		allTexts = [];
 	}
-	
-	function dispose() {
-		font.dispose();
-		scene.dispose();
+
+	override function dispose() {
+		super.dispose();
+		s2d.dispose();
 		cleanTexts();
+		hxd.System.setLoop(function(){});
 	}
-	
+
 	function gameOver() {
 		if( !isGameOver ) {
 			isGameOver = true;
@@ -421,7 +412,7 @@ class Game {
 			hero.anim.currentFrame = 1;
 			var wait = 0.;
 			if( win ) {
-				var v = new h2d.Bitmap(hxd.Res.victory.toTile(), scene);
+				var v = new h2d.Bitmap(hxd.Res.victory.toTile(), s2d);
 				v.x = -v.tile.width;
 				v.alpha = 0.8;
 				v.y = 40;
@@ -444,7 +435,6 @@ class Game {
 					if( wait > 10 ) {
 						dispose();
 						inst = new Game(engine, lastCheck);
-						inst.init();
 						return true;
 					}
 					return false;
@@ -452,7 +442,7 @@ class Game {
 			}
 		}
 	}
-	
+
 	function popText( text : String, color : Int, ?cond ) {
 		if( prev != null && prev.parent != null ) {
 			prev.parent.removeChild(prev);
@@ -461,7 +451,7 @@ class Game {
 		var t = newText();
 		t.textColor = color;
 		t.text = text;
-		t.x = Std.int((scene.width - t.textWidth * t.scaleX) * 0.5);
+		t.x = Std.int((s2d.width - t.textWidth * t.scaleX) * 0.5);
 		t.y = 110;
 		prev = t;
 		if( cond == null )
@@ -480,46 +470,28 @@ class Game {
 		});
 		return t;
 	}
-	
+
 	static var inst : Game;
 	static var title : Title;
-	static var _ENGINE : h3d.Engine;
-	
-	static function doUpdate() {
-		Timer.update();
-		if( inst != null )
-			inst.update();
-		else if( title != null )
-			title.update();
-	}
+	static var _engine : h3d.Engine;
 
 	static function showTitle() {
-		title = new Title(_ENGINE);
+		title = new Title(_engine);
+		_engine = @:privateAccess title.engine;
 		inst = null;
 	}
-	
+
 	public static function start(pos = 0) {
-		inst = new Game(_ENGINE, pos);
-		inst.init();
+		inst = new Game(_engine, pos);
+		_engine = inst.engine;
 		title = null;
 	}
 
 	public static function main() {
-		#if cpp
-		hxd.Res.loader = new hxd.res.Loader(new hxd.res.LocalFileSystem("res"));
-		#else
-		hxd.Res.loader = new hxd.res.Loader(hxd.res.EmbedFileSystem.create( { compressSounds:true } ));
-		#end
+		hxd.Res.initEmbed({ compressSounds:true });
 		#if flash
 		new Music().play(0, 100000);
 		#end
-		_ENGINE = new h3d.Engine(false);
-		_ENGINE.backgroundColor = 0xFF808080;
-		_ENGINE.onReady = function() {
-			Key.initialize();
-			showTitle();
-			hxd.System.setLoop(doUpdate);
-		};
-		_ENGINE.init();
+		showTitle();
 	}
 }

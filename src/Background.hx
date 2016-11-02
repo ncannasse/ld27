@@ -10,18 +10,18 @@ class Background {
 	var sMaxX : Float;
 	var soilMaxX : Float;
 	var loopX : Float = 0;
-	
+
 	public function new() {
-		
+
 		bg = new h2d.Sprite(Game.inst.world);
 		bg2 = new h2d.Sprite(bg);
 		bg4 = new h2d.Sprite(bg);
 		bg3 = new h2d.Sprite(bg);
 		bg1 = new h2d.Sprite(bg);
-		
-		var scene = Game.inst.scene;
-		
-		
+
+		var scene = Game.inst.s2d;
+
+
 		// SOIL
 		var sbg = [
 			{ r : hxd.Res.bg1, n : 18 },
@@ -43,7 +43,7 @@ class Background {
 		}
 		soilMaxX = px;
 
-		
+
 		// MOUNTAINS
 		var bgb = hxd.Res.bgb;
 		var sbg = [
@@ -79,7 +79,7 @@ class Background {
 				px += t.width;
 			}
 		}
-		
+
 		// SKY
 		var sbg = [
 			{ r : hxd.Res.bg2, n : 1 },
@@ -98,22 +98,22 @@ class Background {
 			}
 		}
 		sMaxX = px;
-		
+
 	}
-	
+
 	public function update(x:Float) {
 		bg2.x = x * 0.8;
 		bg3.x = x * 0.2 + loopX * 0.8;
 		bg4.x = x * 0.4;
 		var game = Game.inst;
-		var maxX = (game.scene.width - game.world.x) - sMaxX;
+		var maxX = (game.s2d.width - game.world.x) - sMaxX;
 		if( bg2.x < maxX )
 			bg2.x = maxX;
-		var sm = (game.scene.width - game.world.x) - (soilMaxX + loopX);
+		var sm = (game.s2d.width - game.world.x) - (soilMaxX + loopX);
 		if( sm > 0 ) {
 			loopX += 500;
 			bg1.x = loopX;
 		}
 	}
-	
+
 }
